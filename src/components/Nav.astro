@@ -22,9 +22,6 @@ const isDev = variant === 'dev';
           <>
             <a href="#protocol">Protocol</a>
             <a href="#integrate">Integrate</a>
-            <a href="#status">Status</a>
-            <a href="#" data-stub>Docs</a>
-            <a href="#" data-stub>Changelog</a>
           </>
         ) : (
           <>
@@ -45,11 +42,6 @@ const isDev = variant === 'dev';
         </span>
       )}
       <a href="https://portal.invoicepass.app" class="btn btn-ghost">Sign in</a>
-      {isDev ? (
-        <button type="button" class="btn btn-primary" data-dev-signup-open>Get access</button>
-      ) : (
-        <a href="#claim-hero" class="btn btn-primary">Get my inbox</a>
-      )}
     </div>
   </div>
 </nav>
