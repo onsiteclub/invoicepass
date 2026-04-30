@@ -1,0 +1,50 @@
+---
+---
+
+<div class="contact-backdrop" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle" hidden>
+  <div class="contact-card" role="document">
+    <button type="button" class="contact-close" aria-label="Close" data-contact-close>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <header class="contact-head">
+      <div class="eyebrow"><span class="blue-dot"></span>Get in touch</div>
+      <h2 id="contactTitle"><span class="primary-blue">Tell us about</span> <span class="accent">your team</span></h2>
+      <p class="contact-sub">We onboard the Operation tier manually. Drop your details and we'll reply within one business day.</p>
+    </header>
+
+    <form class="contact-form" id="contactForm" autocomplete="on" novalidate>
+      <div class="contact-field">
+        <label class="contact-label" for="contactName">Name</label>
+        <input class="contact-input" id="contactName" name="name" type="text" required maxlength="80" autocomplete="name" />
+      </div>
+
+      <div class="contact-field">
+        <label class="contact-label" for="contactEmail">Work email</label>
+        <input class="contact-input" id="contactEmail" name="email" type="email" required maxlength="120" autocomplete="email" />
+      </div>
+
+      <div class="contact-field">
+        <label class="contact-label" for="contactCompany">Company <span class="contact-label-mute">(optional)</span></label>
+        <input class="contact-input" id="contactCompany" name="company" type="text" maxlength="80" autocomplete="organization" />
+      </div>
+
+      <div class="contact-field">
+        <label class="contact-label" for="contactMessage">What do you need?</label>
+        <textarea class="contact-input contact-textarea" id="contactMessage" name="message" required maxlength="800" rows="4" placeholder="Team size, what you forward today, any blockers."></textarea>
+      </div>
+
+      {/* honeypot — bots fill it, humans never see it. Submit silently no-ops if filled. */}
+      <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="contact-honeypot" />
+
+      <div class="contact-actions">
+        <button type="submit" class="contact-submit" data-contact-submit>
+          <span class="contact-submit-label">Send message</span>
+          <svg class="contact-submit-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+
+      <p class="contact-status" id="contactStatus" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</div>

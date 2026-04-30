@@ -13,7 +13,7 @@
 
 .cta-section h2 { color: var(--surface); margin-bottom: 16px; }
 .cta-section h2 .accent { font-style: italic; font-weight: 400; color: var(--ink-5); }
-.cta-section h2 .primary-blue { color: var(--blue-soft); }
+.cta-section h2 .primary-blue { color: var(--blue); }
 .cta-section p { color: var(--ink-5); font-size: 17px; line-height: 1.55; max-width: 540px; margin-bottom: 32px; }
 
 .cta-button {

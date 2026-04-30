@@ -61,8 +61,6 @@ h2::after {
   transform: translateY(0.125em);
 }
 
-/* CTA section h2 stays without the dot — it's on dark bg with its own logic */
-.cta-section h2::after { display: none; }
 
 /* ─────── TYPOGRAPHY ─────── */
 h1 { font-size: clamp(40px, 5.5vw, 68px); font-weight: 500; letter-spacing: -0.025em; line-height: 1.04; text-wrap: balance; }

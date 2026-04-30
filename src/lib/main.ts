@@ -7,6 +7,7 @@ import { initStubLinks } from './stub-links';
 import { initHowModal } from './how-modal';
 import { initDevSignup } from './dev-signup';
 import { initWelcome } from './welcome';
+import { initContact } from './contact';
 
 function init(): void {
   initTelemetry();
@@ -18,6 +19,7 @@ function init(): void {
   initHowModal();
   initDevSignup();
   initWelcome();
+  initContact();
 }
 
 if (document.readyState === 'loading') {
