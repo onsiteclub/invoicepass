@@ -5,7 +5,7 @@ import { initCodeTabs } from './code-tabs';
 import { initClaimForms } from './claim';
 import { initStubLinks } from './stub-links';
 import { initHowModal } from './how-modal';
-import { initPersona } from './persona';
+import { initDevSignup } from './dev-signup';
 
 function init(): void {
   initTelemetry();
@@ -15,7 +15,7 @@ function init(): void {
   initClaimForms();
   initStubLinks();
   initHowModal();
-  initPersona();
+  initDevSignup();
 }
 
 if (document.readyState === 'loading') {

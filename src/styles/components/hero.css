@@ -36,3 +36,37 @@
   max-width: 540px;
   margin-bottom: 36px;
 }
+
+/* dev-hero single-CTA variant */
+.hero-cta-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.btn-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ink);
+  color: var(--surface);
+  border: 0;
+  border-radius: var(--radius-lg);
+  padding: 13px 22px;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.btn-cta-primary:hover { background: var(--ink-2); transform: translateY(-1px); }
+.btn-cta-primary svg { transition: transform 0.15s; }
+.btn-cta-primary:hover svg { transform: translateX(2px); }
+
+.hero-cta-note {
+  font-size: 12.5px;
+  color: var(--ink-4);
+  letter-spacing: 0.01em;
+}

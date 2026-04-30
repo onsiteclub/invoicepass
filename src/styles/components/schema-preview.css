@@ -1,0 +1,15 @@
+.schema-block .code-tabs .code-tab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  cursor: default;
+}
+
+.schema-block .code-tab.active::after { display: none; }
+
+.schema-block .code-body {
+  max-height: 540px;
+  overflow: auto;
+}

@@ -1,0 +1,50 @@
+---
+---
+
+<section class="spaced">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="blue-dot"></span>The payload</span>
+      <h2><span class="primary-blue">What you receive.</span> <span class="accent">Verbatim</span></h2>
+      <p>Every webhook delivery carries this. Signed, versioned, idempotent by Message-ID.</p>
+    </div>
+
+    <div class="code-block schema-block">
+      <div class="code-tabs">
+        <button class="code-tab active" type="button">webhook payload · v1</button>
+        <span class="code-tab code-tab-spacer"></span>
+        <button class="copy-btn" id="copyBtnSchema" type="button">copy</button>
+      </div>
+      <pre class="code-body" id="schemaBody"><span class="pun">{`{`}</span>
+  <span class="key">"version"</span><span class="pun">:</span> <span class="str">"v1"</span><span class="pun">,</span>
+  <span class="key">"id"</span><span class="pun">:</span> <span class="str">"inv_8f3a2c91..."</span><span class="pun">,</span>
+  <span class="key">"received_at"</span><span class="pun">:</span> <span class="str">"2026-04-29T21:24:18.412Z"</span><span class="pun">,</span>
+  <span class="key">"from"</span><span class="pun">:</span> <span class="str">"billing@vendor.example"</span><span class="pun">,</span>
+  <span class="key">"to"</span><span class="pun">:</span> <span class="str">"your-handle@invoicepass.app"</span><span class="pun">,</span>
+  <span class="key">"message_id"</span><span class="pun">:</span> <span class="str">"&lt;CAFx7N...@mail.vendor.example&gt;"</span><span class="pun">,</span>
+  <span class="key">"extracted"</span><span class="pun">:</span> <span class="pun">{`{`}</span>
+    <span class="key">"vendor"</span><span class="pun">:</span> <span class="str">"Stronghold Lumber Co."</span><span class="pun">,</span>
+    <span class="key">"invoice_number"</span><span class="pun">:</span> <span class="str">"INV-2487"</span><span class="pun">,</span>
+    <span class="key">"issued"</span><span class="pun">:</span> <span class="str">"2026-04-22"</span><span class="pun">,</span>
+    <span class="key">"due"</span><span class="pun">:</span> <span class="str">"2026-05-22"</span><span class="pun">,</span>
+    <span class="key">"subtotal"</span><span class="pun">:</span> <span class="num">1247.83</span><span class="pun">,</span>
+    <span class="key">"tax"</span><span class="pun">:</span> <span class="num">162.22</span><span class="pun">,</span>
+    <span class="key">"total"</span><span class="pun">:</span> <span class="num">1410.05</span><span class="pun">,</span>
+    <span class="key">"currency"</span><span class="pun">:</span> <span class="str">"CAD"</span><span class="pun">,</span>
+    <span class="key">"line_items"</span><span class="pun">:</span> <span class="pun">[</span> <span class="com">/* ... */</span> <span class="pun">]</span>
+  <span class="pun">{`}`}</span><span class="pun">,</span>
+  <span class="key">"deduplication"</span><span class="pun">:</span> <span class="pun">{`{`}</span>
+    <span class="key">"hash"</span><span class="pun">:</span> <span class="str">"sha256:5607fe67..."</span><span class="pun">,</span>
+    <span class="key">"status"</span><span class="pun">:</span> <span class="str">"unique"</span><span class="pun">,</span>
+    <span class="key">"checked_against"</span><span class="pun">:</span> <span class="num">4821</span>
+  <span class="pun">{`}`}</span><span class="pun">,</span>
+  <span class="key">"signature"</span><span class="pun">:</span> <span class="pun">{`{`}</span>
+    <span class="key">"alg"</span><span class="pun">:</span> <span class="str">"ed25519"</span><span class="pun">,</span>
+    <span class="key">"value"</span><span class="pun">:</span> <span class="str">"MEUCIQDx..."</span><span class="pun">,</span>
+    <span class="key">"verified"</span><span class="pun">:</span> <span class="str">true</span>
+  <span class="pun">{`}`}</span><span class="pun">,</span>
+  <span class="key">"raw_pdf_url"</span><span class="pun">:</span> <span class="str">"https://signed.invoicepass.app/.../inv_8f3a2c91.pdf"</span>
+<span class="pun">{`}`}</span></pre>
+    </div>
+  </div>
+</section>

@@ -1,33 +1,55 @@
 ---
 import Logo from './Logo.astro';
+
+interface Props {
+  variant?: 'dev' | 'op';
+}
+
+const { variant = 'dev' } = Astro.props;
+const isDev = variant === 'dev';
 ---
 
 <nav>
   <div class="container nav-row">
-    <div class="nav-left">
-      <a href="/" class="logo">
-        <Logo variant="nav" />
-        InvoicePass
-      </a>
-      <div class="nav-links">
-        <a href="#protocol">Protocol</a>
-        <a href="#integrate">Integrate</a>
-        <a href="#status">Status</a>
-        <a href="#" data-stub>Docs</a>
-        <a href="#" data-stub>Changelog</a>
-      </div>
-    </div>
+    <a href="/" class="logo">
+      <Logo variant="nav" />
+      <span class="logo-text">Invoice<span class="logo-flow">Pass</span></span>
+    </a>
+
     <div class="nav-right">
-      <button class="persona-switch" id="personaSwitch" type="button" title="Switch view">
-        <svg class="swap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
-        <span id="personaLabel">developer view</span>
-      </button>
-      <span class="status-pill">
-        <span class="dot"></span>
-        all systems operational
-      </span>
+      <div class="nav-links">
+        {isDev ? (
+          <>
+            <a href="#protocol">Protocol</a>
+            <a href="#integrate">Integrate</a>
+            <a href="#status">Status</a>
+            <a href="#" data-stub>Docs</a>
+            <a href="#" data-stub>Changelog</a>
+          </>
+        ) : (
+          <>
+            <a href="#how">How it works</a>
+            <a href="#pricing">Pricing</a>
+          </>
+        )}
+        <a class="nav-cross" href={isDev ? '/inbox' : '/'}>
+          {isDev ? 'For teams' : 'For developers'}
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+
+      {isDev && (
+        <span class="status-pill">
+          <span class="dot"></span>
+          all systems operational
+        </span>
+      )}
       <a href="https://portal.invoicepass.app" class="btn btn-ghost">Sign in</a>
-      <a href="#claim" class="btn btn-primary">Get access</a>
+      {isDev ? (
+        <button type="button" class="btn btn-primary" data-dev-signup-open>Get access</button>
+      ) : (
+        <a href="#claim-hero" class="btn btn-primary">Get my inbox</a>
+      )}
     </div>
   </div>
 </nav>

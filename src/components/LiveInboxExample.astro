@@ -1,0 +1,50 @@
+---
+const rows = [
+  { initials: 'CS', name: 'Cristony silva', sub: 'general contractor · 8 invoices', balance: '+$2,840.00', tone: 'green' as const, tag: 'owes you' },
+  { initials: 'LF', name: 'Lucas Framing',  sub: 'framing crew · 4 invoices',     balance: '−$1,420.00', tone: 'red' as const,   tag: 'you owe' },
+  { initials: 'MS', name: 'Maria Santos',   sub: 'cleaning crew · 12 invoices',   balance: '+$680.00',   tone: 'green' as const, tag: 'owes you' },
+  { initials: 'TF', name: 'Tiago Ferreira', sub: 'electrical · 3 invoices',       balance: '−$3,210.00', tone: 'red' as const,   tag: 'you owe' },
+];
+---
+
+<section class="spaced">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="blue-dot"></span>Real example</span>
+      <h2><span class="primary-blue">This is the view.</span> <span class="accent">Sorted by person, not by date</span></h2>
+      <p>When you open your portal, this is what you see. Each row is a person you work with. Green means they owe you. Red means you owe them. Click to open their checkbook.</p>
+    </div>
+
+    <div class="checkbooks-mock">
+      <div class="checkbooks-head">
+        <div class="checkbooks-head-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 7h18"/>
+            <path d="M3 12h18"/>
+            <path d="M3 17h12"/>
+          </svg>
+          Checkbooks
+        </div>
+        <span class="checkbooks-head-meta">4 people · this month</span>
+      </div>
+
+      <div class="checkbooks-list">
+        {rows.map(r => (
+          <div class="checkbook-row">
+            <div class="checkbook-avatar">{r.initials}</div>
+            <div class="checkbook-meta">
+              <span class="checkbook-name">{r.name}</span>
+              <span class="checkbook-sub">{r.sub}</span>
+            </div>
+            <span class={`checkbook-balance ${r.tone}`}>{r.balance}</span>
+            <span class={`checkbook-tag ${r.tone}`}>{r.tag}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <p class="live-inbox-caption">
+      This is the view from your Checkbooks tab — every person you work with, at a glance.
+    </p>
+  </div>
+</section>

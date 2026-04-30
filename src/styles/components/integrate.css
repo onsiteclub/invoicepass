@@ -114,3 +114,25 @@
 
 .code-pane { display: none; }
 .code-pane.active { display: block; }
+
+.integrate-foot {
+  margin-top: 32px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.integrate-docs-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  transition: color 0.15s;
+}
+
+.integrate-docs-link:hover { color: var(--blue); }
+.integrate-docs-link svg { transition: transform 0.15s; }
+.integrate-docs-link:hover svg { transform: translateX(2px); }

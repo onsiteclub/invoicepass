@@ -25,8 +25,8 @@ h1::after {
   background: var(--amber);
   border-radius: 50%;
   margin-left: 0.18em;
-  margin-bottom: 0.05em;
   vertical-align: baseline;
+  transform: translateY(0.18em);
 }
 
 h2::after {
@@ -37,8 +37,8 @@ h2::after {
   background: var(--amber);
   border-radius: 50%;
   margin-left: 0.14em;
-  margin-bottom: 0.04em;
   vertical-align: baseline;
+  transform: translateY(0.125em);
 }
 
 /* CTA section h2 stays without the dot — it's on dark bg with its own logic */

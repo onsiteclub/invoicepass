@@ -1,5 +1,19 @@
 /* claim form — label + how-it-works link */
-.claim-wrap { max-width: 480px; }
+.claim-wrap { max-width: 580px; }
+
+/* elevated card variant — used in hero forms */
+.claim-card {
+  max-width: 580px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px 20px;
+  box-shadow: var(--shadow-lg);
+}
+
+.claim-card .claim-label-row { padding: 0; margin-bottom: 12px; }
+.claim-card .claim-row,
+.claim-card .claim-feedback { max-width: none; }
 
 .claim-label-row {
   display: flex;
@@ -46,16 +60,25 @@
   letter-spacing: -0.005em;
 }
 
-/* claim form */
+/* row that holds the input box + button side-by-side */
+.claim-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  max-width: 440px;
+}
+
+/* claim — input box (button is no longer inside) */
 .claim {
+  flex: 1;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 7px 7px 7px 18px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  max-width: 480px;
+  gap: 10px;
+  min-width: 0;
   box-shadow: var(--shadow-sm);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -65,6 +88,9 @@
   box-shadow: var(--shadow);
 }
 
+.claim.is-available { border-color: var(--green); box-shadow: 0 0 0 3px rgba(24, 169, 87, 0.12); }
+.claim.is-taken     { border-color: var(--red);   box-shadow: 0 0 0 3px rgba(220, 74, 74, 0.12); }
+
 .claim input {
   flex: 1;
   border: 0;
@@ -73,26 +99,45 @@
   font-family: var(--font-mono);
   font-size: 14px;
   color: var(--ink);
-  padding: 10px 0;
+  padding: 11px 0;
   letter-spacing: -0.005em;
+  min-width: 0;
 }
 
 .claim input::placeholder { color: var(--ink-5); }
 
-.claim button {
-  padding: 10px 18px;
+.claim-btn {
+  padding: 0 18px;
   background: var(--ink);
   color: var(--surface);
   border: 0;
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   font-family: inherit;
   font-size: 13.5px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.claim button:hover { background: var(--ink-2); }
+.claim-btn:hover { background: var(--ink-2); }
+
+.claim-feedback {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-4);
+  letter-spacing: -0.005em;
+  line-height: 1.4;
+  min-height: 16px;
+  max-width: 440px;
+}
+
+.claim-feedback:empty      { visibility: hidden; }
+.claim-feedback.available  { color: var(--green); }
+.claim-feedback.taken      { color: var(--red); }
 
 .claim-note {
   margin-top: 14px;

@@ -1,12 +1,28 @@
 ---
+interface Props {
+  variant?: 'dev' | 'op';
+}
+
+const { variant = 'dev' } = Astro.props;
+const isDev = variant === 'dev';
 ---
 
 <section class="spaced" id="status" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
   <div class="container">
     <div class="section-head">
-      <span class="eyebrow"><span class="blue-dot"></span>Status</span>
-      <h2><span class="primary-blue">Public uptime,</span> <span class="accent">real numbers</span></h2>
-      <p>Every service is monitored externally and reported here without filter. Last 90 days shown. Incidents disclosed within 15 minutes.</p>
+      {isDev ? (
+        <>
+          <span class="eyebrow"><span class="blue-dot"></span>Status</span>
+          <h2><span class="primary-blue">Public uptime,</span> <span class="accent">real numbers</span></h2>
+          <p>Every service is monitored externally and reported here without filter. Last 90 days shown. Incidents disclosed within 15 minutes.</p>
+        </>
+      ) : (
+        <>
+          <span class="eyebrow"><span class="blue-dot"></span>Reliability</span>
+          <h2><span class="primary-blue">Up when you need it.</span> <span class="accent">Always</span></h2>
+          <p>We watch this 24/7. So you don't have to.</p>
+        </>
+      )}
     </div>
 
     <div class="status-card">

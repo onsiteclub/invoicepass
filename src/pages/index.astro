@@ -1,34 +1,33 @@
 ---
 import Base from '../layouts/Base.astro';
-import PersonaModal from '../components/PersonaModal.astro';
 import Nav from '../components/Nav.astro';
 import HeroDeveloper from '../components/HeroDeveloper.astro';
-import HeroOperator from '../components/HeroOperator.astro';
+import WhyThisExists from '../components/WhyThisExists.astro';
 import TrustBand from '../components/TrustBand.astro';
 import PipelineSection from '../components/PipelineSection.astro';
 import IntegrateSection from '../components/IntegrateSection.astro';
-import HowItWorksSection from '../components/HowItWorksSection.astro';
-import QuoteSection from '../components/QuoteSection.astro';
 import StatusPage from '../components/StatusPage.astro';
+import SchemaPreview from '../components/SchemaPreview.astro';
 import CTASection from '../components/CTASection.astro';
 import Footer from '../components/Footer.astro';
-import HowItWorksModal from '../components/HowItWorksModal.astro';
+import DevSignupModal from '../components/DevSignupModal.astro';
 import Toast from '../components/Toast.astro';
 ---
 
-<Base>
-  <PersonaModal />
-  <Nav />
+<Base
+  title="InvoicePass — The invoice ingestion layer"
+  description="The invoice ingestion layer for engineers. SMTP ingress, deterministic dedup, signed delivery. Stop building invoice plumbing."
+>
+  <Nav variant="dev" />
   <HeroDeveloper />
-  <HeroOperator />
+  <WhyThisExists />
   <TrustBand />
   <PipelineSection />
   <IntegrateSection />
-  <HowItWorksSection />
-  <QuoteSection />
-  <StatusPage />
+  <StatusPage variant="dev" />
+  <SchemaPreview />
   <CTASection />
-  <Footer />
-  <HowItWorksModal />
+  <Footer variant="dev" />
+  <DevSignupModal />
   <Toast />
 </Base>

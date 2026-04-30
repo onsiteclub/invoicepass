@@ -4,25 +4,25 @@ import ClaimSuccessCard from './ClaimSuccessCard.astro';
 import InboxMock from './InboxMock.astro';
 ---
 
-<section class="hero op-only">
+<section class="hero" id="claim-hero">
   <div class="container">
     <div class="hero-grid">
 
       <div>
-        <div class="hero-eyebrow eyebrow"><span class="blue-dot"></span>For operators</div>
+        <div class="hero-eyebrow eyebrow"><span class="blue-dot"></span>For foremen, contractors, and crews</div>
 
-        <h1><span class="primary-blue">Every invoice you get.</span> <span class="accent">In one signed inbox</span></h1>
+        <h1><span class="primary-blue">Every invoice.</span> <span class="accent">In one inbox</span></h1>
 
         <p class="hero-sub">
-          Forward invoices from anywhere — Gmail, Outlook, vendor portals. They're parsed, deduped, and organized in your portal. Without spreadsheets. Without lost attachments. Exactly once.
+          Forward invoices from anywhere — Gmail, Outlook, vendor texts, paper photos. They land in your portal, sorted by person. You see who's in the green, who's in the red, and you settle up at the end of the month.
         </p>
 
-        <ClaimForm formId="claimFormOp" inputId="handleInputOp" howLinkId="howLinkOp" />
-
-        <div class="claim-note">
-          <span class="check">✓</span>
-          Free up to 10 users · No credit card · One inbox per operator
-        </div>
+        <ClaimForm formId="claimFormOp" inputId="handleInputOp" howLinkId="howLinkOp">
+          <div class="claim-note" slot="note">
+            <span class="check">✓</span>
+            Free up to 10 users · No credit card · One inbox per operator
+          </div>
+        </ClaimForm>
 
         <ClaimSuccessCard cardId="claimSuccessOp" handleId="handleResultOp" emailId="handleEmailOp" />
       </div>

@@ -1,10 +1,8 @@
 ---
-import ClaimForm from './ClaimForm.astro';
-import ClaimSuccessCard from './ClaimSuccessCard.astro';
 import TelemetryPanel from './TelemetryPanel.astro';
 ---
 
-<section class="hero dev-only">
+<section class="hero">
   <div class="container">
     <div class="hero-grid">
 
@@ -17,14 +15,15 @@ import TelemetryPanel from './TelemetryPanel.astro';
           One inbox per operator. SMTP ingress, deterministic deduplication, signed delivery to your stack — so no invoice ever lands in the wrong place, twice, or not at all.
         </p>
 
-        <ClaimForm formId="claimForm" inputId="handleInput" howLinkId="howLinkTop" />
-
-        <div class="claim-note">
-          <span class="check">✓</span>
-          Free up to 10 users · No credit card · One inbox per operator
+        <div class="hero-cta-wrap">
+          <button type="button" class="btn-cta-primary" data-dev-signup-open>
+            Join the dev preview
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+          <p class="hero-cta-note mono">
+            Free during preview · Manual onboarding · Keys within 48h
+          </p>
         </div>
-
-        <ClaimSuccessCard cardId="claimSuccess" handleId="handleResult" emailId="handleEmail" />
 
       </div>
 

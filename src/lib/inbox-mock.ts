@@ -56,9 +56,9 @@ export function initInboxMock(): void {
   // seed initial 6
   for (let i = 0; i < 6; i++) inboxList.appendChild(makeInboxItem(false));
 
-  // periodically add new ones at top
+  // periodically add new ones at top (only runs while #inboxList is in the DOM)
   setInterval(() => {
-    if (!document.body.classList.contains('persona-op')) return;
+    if (!document.body.contains(inboxList)) return;
     inboxList.insertBefore(makeInboxItem(true), inboxList.firstChild);
     inboxCountVal++;
     inboxCount.textContent = `${inboxCountVal} invoices`;

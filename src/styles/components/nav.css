@@ -15,21 +15,30 @@ nav {
   padding: 14px 0;
 }
 
-.nav-left { display: flex; align-items: center; gap: 36px; }
-
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-weight: 600;
-  font-size: 15.5px;
+  font-size: 16px;
   color: var(--ink);
   letter-spacing: -0.01em;
 }
 
+.logo-text { display: inline-flex; align-items: baseline; }
+
+.logo-flow {
+  font-style: italic;
+  font-weight: 450;
+  color: var(--ink-2);
+  letter-spacing: -0.005em;
+}
+
 .nav-links {
   display: flex;
+  align-items: center;
   gap: 26px;
+  margin-right: 8px;
 }
 
 .nav-links a {
@@ -44,7 +53,7 @@ nav {
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .status-pill {
@@ -79,28 +88,23 @@ nav {
   .nav-links, .status-pill { display: none; }
 }
 
-/* persona switcher in nav */
-.persona-switch {
+/* cross-page link (For teams → / For developers →) */
+.nav-cross {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 11px;
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  gap: 5px;
+  font-size: 13px;
   color: var(--ink-3);
+  font-weight: 450;
+  font-family: var(--font-sans);
+  padding: 5px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
   background: var(--surface);
-  cursor: pointer;
-  transition: all 0.15s;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  transition: color 0.15s, border-color 0.15s;
 }
 
-.persona-switch:hover { border-color: var(--ink-4); color: var(--ink); }
+.nav-cross:hover { color: var(--ink); border-color: var(--border-strong); }
 
-.persona-switch .swap-icon {
-  width: 11px;
-  height: 11px;
-  color: var(--ink-4);
-}
+.nav-cross svg { color: var(--ink-4); transition: transform 0.15s; }
+.nav-cross:hover svg { transform: translateX(2px); color: var(--ink-3); }

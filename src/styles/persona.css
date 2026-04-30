@@ -1,9 +1,0 @@
-/* ─────── PERSONA SYSTEM ─────── */
-.dev-only, .op-only { display: none; }
-body.persona-dev .dev-only { display: revert; }
-body.persona-op  .op-only  { display: revert; }
-/* block-level overrides for layout sections */
-body.persona-dev section.dev-only { display: block; }
-body.persona-op  section.op-only  { display: block; }
-body.persona-dev .hero.dev-only,
-body.persona-op  .hero.op-only { display: block; }

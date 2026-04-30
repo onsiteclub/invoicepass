@@ -1,0 +1,127 @@
+.checkbooks-mock {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.checkbooks-head {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkbooks-head-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13.5px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.checkbooks-head-title svg { color: var(--ink-3); }
+
+.checkbooks-head-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.checkbooks-list { display: flex; flex-direction: column; }
+
+.checkbook-row {
+  display: grid;
+  grid-template-columns: 36px 1fr auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.checkbook-row:last-child { border-bottom: 0; }
+
+.checkbook-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.checkbook-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.checkbook-name {
+  font-size: 14.5px;
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.checkbook-sub {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-4);
+}
+
+.checkbook-balance {
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.checkbook-balance.green { color: var(--green); }
+.checkbook-balance.red   { color: var(--red); }
+.checkbook-balance.flat  { color: var(--ink-4); }
+
+.checkbook-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: var(--surface-2);
+  color: var(--ink-4);
+}
+
+.checkbook-tag.green { background: var(--green-soft); color: var(--green); }
+.checkbook-tag.red   { background: rgba(220, 74, 74, 0.1); color: var(--red); }
+
+.live-inbox-caption {
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-4);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 600px) {
+  .checkbook-row {
+    grid-template-columns: 32px 1fr auto;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .checkbook-row .checkbook-tag { display: none; }
+}

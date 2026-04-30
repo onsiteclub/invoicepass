@@ -4,12 +4,14 @@ interface Props {
   inputId: string;
   howLinkId: string;
   dark?: boolean;
+  card?: boolean;
 }
 
-const { formId, inputId, howLinkId, dark = false } = Astro.props;
+const { formId, inputId, howLinkId, dark = false, card = !dark } = Astro.props;
+const wrapClass = card ? 'claim-card' : 'claim-wrap';
 ---
 
-<div class="claim-wrap">
+<div class={wrapClass}>
   <div class={`claim-label-row${dark ? ' claim-label-row-dark' : ''}`}>
     <span class="claim-label">Your inbox name</span>
     <button type="button" class={`how-link${dark ? ' how-link-dark' : ''}`} id={howLinkId}>
@@ -17,15 +19,21 @@ const { formId, inputId, howLinkId, dark = false } = Astro.props;
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     </button>
   </div>
-  <form class="claim" id={formId} autocomplete="off">
-    <input
-      id={inputId}
-      type="text"
-      placeholder="silva"
-      spellcheck="false"
-      autocapitalize="none"
-    />
-    <span class="mono claim-suffix">@invoicepass.app</span>
-    <button type="submit">Claim →</button>
+  <form id={formId} autocomplete="off">
+    <div class="claim-row">
+      <div class="claim">
+        <input
+          id={inputId}
+          type="text"
+          placeholder="silva"
+          spellcheck="false"
+          autocapitalize="none"
+        />
+        <span class="mono claim-suffix">@invoicepass.app</span>
+      </div>
+      <button type="submit" class="claim-btn">Claim →</button>
+    </div>
+    <span class="claim-feedback" aria-live="polite"></span>
   </form>
 </div>
+<slot name="note" />

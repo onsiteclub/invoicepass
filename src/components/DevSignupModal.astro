@@ -1,0 +1,87 @@
+---
+import Logo from './Logo.astro';
+---
+
+<div class="dev-modal-backdrop" id="devSignupModal" role="dialog" aria-modal="true" aria-labelledby="devSignupTitle" hidden>
+  <div class="dev-modal" role="document">
+    <header class="dev-modal-head">
+      <div class="dev-modal-brand">
+        <Logo variant="compact" />
+        <span class="logo-text">Invoice<span class="logo-flow">Pass</span></span>
+      </div>
+      <button class="dev-modal-close" type="button" id="devSignupClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </header>
+
+    <div class="dev-modal-body" id="devSignupForm">
+      <div class="dev-modal-eyebrow eyebrow"><span class="blue-dot"></span>Dev preview</div>
+      <h3 class="dev-modal-title" id="devSignupTitle">Join the preview</h3>
+      <p class="dev-modal-sub">
+        We're onboarding manually right now. Drop your details and we'll reach out within 48h with API keys and a private channel.
+      </p>
+
+      <form id="devSignup" autocomplete="off" novalidate>
+        <label class="dev-field">
+          <span class="dev-field-label">Email</span>
+          <input
+            type="email"
+            id="devEmail"
+            name="email"
+            placeholder="you@company.com"
+            autocomplete="email"
+            required
+          />
+          <span class="dev-field-error" data-error-for="email"></span>
+        </label>
+
+        <label class="dev-field">
+          <span class="dev-field-label">Name</span>
+          <input
+            type="text"
+            id="devName"
+            name="name"
+            placeholder="Jane Doe"
+            autocomplete="name"
+            required
+          />
+          <span class="dev-field-error" data-error-for="name"></span>
+        </label>
+
+        <label class="dev-field">
+          <span class="dev-field-label">What are you building?</span>
+          <textarea
+            id="devBuilding"
+            name="building"
+            rows="3"
+            placeholder="Invoice ingestion for our procurement platform — currently parsing PDFs with pdfplumber + Claude, hitting limits on..."
+            required
+            minlength="20"
+          ></textarea>
+          <span class="dev-field-error" data-error-for="building"></span>
+        </label>
+
+        <button type="submit" class="dev-modal-submit" id="devSignupSubmit" disabled>
+          Request access
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <p class="dev-modal-foot">We read every signup. No marketing list.</p>
+      </form>
+    </div>
+
+    <div class="dev-modal-body dev-modal-success" id="devSignupSuccess" hidden>
+      <div class="dev-modal-eyebrow eyebrow"><span class="blue-dot"></span>Dev preview</div>
+      <div class="dev-success-check">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h3 class="dev-modal-title">Got it</h3>
+      <p class="dev-modal-sub" id="devSuccessBody">
+        We'll reach out within 48h. Keep an eye on your inbox — sometimes our first email lands in spam.
+      </p>
+      <button type="button" class="dev-modal-submit dev-modal-close-btn" id="devSignupCloseBottom">
+        Close
+      </button>
+    </div>
+  </div>
+</div>

@@ -2,7 +2,6 @@
 @import './tokens.css';
 @import './base.css';
 @import './layout.css';
-@import './persona.css';
 
 /* Components */
 @import './components/nav.css';
@@ -15,10 +14,16 @@
 @import './components/pipeline.css';
 @import './components/integrate.css';
 @import './components/how-it-works.css';
-@import './components/quote.css';
 @import './components/status-page.css';
 @import './components/cta.css';
 @import './components/footer.css';
-@import './components/persona-modal.css';
 @import './components/how-modal.css';
 @import './components/toast.css';
+
+/* New for two-page split */
+@import './components/why-this-exists.css';
+@import './components/schema-preview.css';
+@import './components/dev-signup-modal.css';
+@import './components/what-it-is-isnt.css';
+@import './components/live-inbox-example.css';
+@import './components/pricing.css';
