@@ -1,0 +1,35 @@
+---
+import ClaimForm from './ClaimForm.astro';
+import ClaimSuccessCard from './ClaimSuccessCard.astro';
+import TelemetryPanel from './TelemetryPanel.astro';
+---
+
+<section class="hero dev-only">
+  <div class="container">
+    <div class="hero-grid">
+
+      <div>
+        <div class="hero-eyebrow eyebrow"><span class="blue-dot"></span>v1.4 — inbound endpoint</div>
+
+        <h1><span class="primary-blue">The invoice</span> <span class="accent">ingestion layer</span></h1>
+
+        <p class="hero-sub">
+          One inbox per operator. SMTP ingress, deterministic deduplication, signed delivery to your stack — so no invoice ever lands in the wrong place, twice, or not at all.
+        </p>
+
+        <ClaimForm formId="claimForm" inputId="handleInput" howLinkId="howLinkTop" />
+
+        <div class="claim-note">
+          <span class="check">✓</span>
+          Free up to 10 users · No credit card · One inbox per operator
+        </div>
+
+        <ClaimSuccessCard cardId="claimSuccess" handleId="handleResult" emailId="handleEmail" />
+
+      </div>
+
+      <TelemetryPanel />
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,51 @@
+---
+---
+
+<section class="spaced dev-only" id="protocol">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="blue-dot"></span>The pipeline</span>
+      <h2><span class="primary-blue">Four stages between an email</span> <span class="accent">and your system of record</span></h2>
+      <p>Every invoice that arrives in an InvoicePass inbox passes through the same deterministic pipeline. No queues you have to manage. No webhooks you have to retry. The protocol is the contract.</p>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">[01]</div>
+        <div class="flow-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="flow-title">SMTP inbound</div>
+        <div class="flow-desc">Authenticated mail accepted from any sender. MIME parsed, attachments extracted, headers preserved.</div>
+        <div class="flow-meta">// MIME · DKIM · threading</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">[02]</div>
+        <div class="flow-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="flow-title">PDF extract</div>
+        <div class="flow-desc">Metadata pulled via XMP, then subject line, then sender heuristics. Fallback cascade resolves 99.2% of invoices.</div>
+        <div class="flow-meta">// XMP · subject · heuristic</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">[03]</div>
+        <div class="flow-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div class="flow-title">Three-signal dedup</div>
+        <div class="flow-desc">SHA-256 hash, invoice number, and amount window cross-checked against your last 12 months. Duplicates flagged, not silently dropped.</div>
+        <div class="flow-meta">// hash · number · amount</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">[04]</div>
+        <div class="flow-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="flow-title">Signed delivery</div>
+        <div class="flow-desc">A signed URL pushed to your endpoint. TLS-only, TTL one hour, replay-safe. Or stays in the portal for human review.</div>
+        <div class="flow-meta">// webhook · TTL 1h · TLS</div>
+      </div>
+    </div>
+  </div>
+</section>

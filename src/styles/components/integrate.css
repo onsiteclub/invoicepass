@@ -1,0 +1,116 @@
+.code-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+@media (max-width: 880px) {
+  .code-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+
+.code-text h3 {
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin-bottom: 14px;
+  color: var(--ink);
+}
+
+.code-text p {
+  font-size: 15.5px;
+  color: var(--ink-3);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.code-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+}
+
+.code-list li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.code-list svg { color: var(--green); margin-top: 4px; }
+
+.code-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.code-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.code-tab {
+  padding: 11px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-4);
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  border-right: 1px solid var(--border);
+  transition: color 0.15s;
+}
+
+.code-tab:hover { color: var(--ink-2); }
+.code-tab.active { color: var(--ink); background: var(--surface); position: relative; }
+.code-tab.active::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 1.5px;
+  background: var(--ink);
+}
+
+.code-tab-spacer { flex: 1; border-right: 0 !important; }
+
+.copy-btn {
+  padding: 11px 14px;
+  background: transparent;
+  border: 0;
+  color: var(--ink-4);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+
+.copy-btn:hover { color: var(--ink); }
+.copy-btn.copied { color: var(--green); }
+
+.code-body {
+  padding: 22px 24px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--ink-2);
+  overflow-x: auto;
+}
+
+.code-body .com  { color: var(--ink-4); font-style: italic; }
+.code-body .key  { color: var(--blue); }
+.code-body .str  { color: #1B7F4A; }
+.code-body .pun  { color: var(--ink-4); }
+.code-body .num  { color: var(--amber); }
+.code-body .ind  { display: inline-block; width: 1em; }
+
+.code-pane { display: none; }
+.code-pane.active { display: block; }

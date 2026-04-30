@@ -1,0 +1,44 @@
+---
+type Variant = 'nav' | 'compact' | 'compact-dark';
+
+interface Props {
+  variant?: Variant;
+  width?: number;
+  height?: number;
+}
+
+const { variant = 'compact', width, height } = Astro.props;
+
+// nav variant has the 3 inbound mail strokes; compact does not
+const showStrokes = variant === 'nav';
+
+// circle outer fill — needs to match the page bg behind it
+// nav lives over var(--bg) (#FBFCFD)
+// compact (modal) lives over var(--surface) (#FFFFFF)
+// compact-dark sits in the persona modal where bg is also white
+const outerFill = variant === 'nav' ? '#FBFCFD' : '#FFFFFF';
+
+const w = width ?? (variant === 'nav' ? 28 : 24);
+const h = height ?? (variant === 'nav' ? 22 : 19);
+---
+
+<svg
+  width={w}
+  height={h}
+  viewBox="-14 -6 64 38"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+>
+  <rect x="0" y="0" width="42" height="32" rx="3" fill="none" stroke="#0F1419" stroke-width="2.5" />
+  <path d="M 3 3 L 21 18 L 39 3" fill="none" stroke="#0F1419" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  {showStrokes && (
+    <>
+      <line x1="-12" y1="10" x2="-3" y2="10" stroke="#1E5FCC" stroke-width="2" stroke-linecap="round" />
+      <line x1="-16" y1="18" x2="-3" y2="18" stroke="#1E5FCC" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+      <line x1="-12" y1="26" x2="-3" y2="26" stroke="#1E5FCC" stroke-width="2" stroke-linecap="round" opacity="0.4" />
+    </>
+  )}
+  <circle cx="44" cy="-2" r="6" fill={outerFill} />
+  <circle cx="44" cy="-2" r="4.5" fill="#E8A33A" />
+</svg>

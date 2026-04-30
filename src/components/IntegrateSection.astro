@@ -1,0 +1,89 @@
+---
+---
+
+<section class="spaced dev-only" id="integrate" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="blue-dot"></span>Integrate</span>
+      <h2><span class="primary-blue">One endpoint.</span> <span class="accent">Five lines of code</span></h2>
+      <p>If you can receive a webhook, you can ingest invoices. If you can't, route to your portal inbox and triage there. No SDK required, no vendor lock.</p>
+    </div>
+
+    <div class="code-grid">
+      <div class="code-text">
+        <h3>POST /api/v1/inbox</h3>
+        <p>Subscribe your endpoint. We deliver each invoice with a signed payload, a deterministic ID, and full audit trail. Idempotent by Message-ID — replay anytime.</p>
+        <ul class="code-list">
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Bearer auth, timing-safe comparison
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Exponential backoff, 24h retry window
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Quota: 50 PDFs / operator / month during beta
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Storage in ca-central-1 · data residency on request
+          </li>
+        </ul>
+      </div>
+
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-tab="curl">cURL</button>
+          <button class="code-tab" data-tab="node">Node.js</button>
+          <button class="code-tab" data-tab="python">Python</button>
+          <span class="code-tab code-tab-spacer"></span>
+          <button class="copy-btn" id="copyBtn">copy</button>
+        </div>
+
+        <div class="code-pane active" data-pane="curl">
+<pre class="code-body"><span class="com"># subscribe a webhook to receive parsed invoices</span>
+curl <span class="key">-X</span> POST https://api.invoicepass.app/v1/inbox <span class="pun">\</span>
+  <span class="key">-H</span> <span class="str">"Authorization: Bearer ipk_live_<span class="num">7f3a</span>..."</span> <span class="pun">\</span>
+  <span class="key">-H</span> <span class="str">"Content-Type: application/json"</span> <span class="pun">\</span>
+  <span class="key">-d</span> <span class="str">{`'{
+    "endpoint": "https://api.acme.co/invoices",
+    "events": ["invoice.received", "invoice.duplicate"],
+    "format": "v1"
+  }'`}</span>
+
+<span class="com"># →</span> {`{`}<span class="key">"id"</span><span class="pun">:</span> <span class="str">"sub_8ZqK..."</span><span class="pun">,</span> <span class="key">"status"</span><span class="pun">:</span> <span class="str">"active"</span>{`}`}</pre>
+        </div>
+
+        <div class="code-pane" data-pane="node">
+<pre class="code-body"><span class="key">import</span> {`{`} InvoicePass {`}`} <span class="key">from</span> <span class="str">"invoicepass"</span>;
+
+<span class="key">const</span> ip = <span class="key">new</span> <span class="num">InvoicePass</span>(process.env.IPK);
+
+<span class="key">await</span> ip.inbox.subscribe({`{`}
+<span class="ind"></span>endpoint<span class="pun">:</span> <span class="str">"https://api.acme.co/invoices"</span><span class="pun">,</span>
+<span class="ind"></span>events<span class="pun">:</span> [<span class="str">"invoice.received"</span><span class="pun">,</span> <span class="str">"invoice.duplicate"</span>]<span class="pun">,</span>
+<span class="ind"></span>format<span class="pun">:</span> <span class="str">"v1"</span>
+{`}`});
+
+<span class="com">// invoices arrive at /invoices, signed and deduped</span></pre>
+        </div>
+
+        <div class="code-pane" data-pane="python">
+<pre class="code-body"><span class="key">from</span> invoicepass <span class="key">import</span> InvoicePass
+
+ip = <span class="num">InvoicePass</span>(api_key=os.getenv(<span class="str">"IPK"</span>))
+
+ip.inbox.subscribe(
+<span class="ind"></span>endpoint=<span class="str">"https://api.acme.co/invoices"</span><span class="pun">,</span>
+<span class="ind"></span>events=[<span class="str">"invoice.received"</span><span class="pun">,</span> <span class="str">"invoice.duplicate"</span>]<span class="pun">,</span>
+<span class="ind"></span>format=<span class="str">"v1"</span>
+)
+
+<span class="com"># signed, deduped, idempotent. that's it.</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

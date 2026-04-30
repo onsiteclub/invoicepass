@@ -1,0 +1,20 @@
+---
+import ClaimForm from './ClaimForm.astro';
+---
+
+<section class="spaced">
+  <div class="container">
+    <div class="cta-section">
+      <span class="eyebrow" style="color: var(--ink-5)"><span class="blue-dot"></span>Beta access</span>
+      <h2 style="margin-top: 16px;">Pick a name. <span class="accent">Start receiving invoices.</span></h2>
+      <p>Operators only. No marketing list. We onboard manually so the first invoice you send through InvoicePass works the way you'd expect — clean, signed, exactly once.</p>
+
+      <ClaimForm
+        formId="claimFormBottom"
+        inputId="handleInputBottom"
+        howLinkId="howLinkBottom"
+        dark={true}
+      />
+    </div>
+  </div>
+</section>

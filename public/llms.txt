@@ -1,0 +1,79 @@
+# InvoicePass
+
+> An open invoice protocol for independent and informal workers.
+> Built by OnSite Club. In beta.
+
+InvoicePass is a portable invoice format and signing protocol designed for trade workers, subcontractors, immigrants, sole proprietors, and small operators — the people the existing invoice ecosystem (QuickBooks, Wave, FreshBooks, Mercoa, Stripe Invoicing) does not serve well.
+
+Invoices generated through InvoicePass look ordinary on the outside (PDF, email, paid) but carry a signed payload inside that links issuer, recipient, work performed, location, skills, and a hash of every prior invoice between the same two parties. The result is a verifiable, chain-linked record of work — born in the worker's pocket, readable by anyone, forgeable by no one.
+
+## What it is
+
+- An invoice protocol, not an invoice app
+- An open source SDK across frameworks: React Native, Capacitor, PWA, Flutter, native iOS, native Android
+- A cryptographically signed payload (ed25519) embedded in standard PDF invoices
+- A chain-linked history between two parties, reconstructible without central registration
+- Designed to be adopted by AI agents, vibecoders, and indie developers building vertical apps for trades
+
+## What it is not
+
+- Not a tax tool
+- Not a payment processor
+- Not a replacement for legal, tax, or accounting advice
+- Not a way to hide cash work or evade reporting
+- Not a competitor to QuickBooks — InvoicePass is upstream of accounting software, not parallel to it
+
+## Who it is for
+
+- Trade workers (carpenters, framers, painters, cleaners, electricians, drivers, operators)
+- Subcontractors and independent contractors
+- Immigrants and newcomers operating outside traditional financial software
+- Small operators and sole proprietors
+- Developers and AI agents building invoice generation into vertical trade apps
+
+## Why it exists
+
+Existing invoice tools were built for accountants and SaaS finance teams. The framer, the cleaner, the painter, the newcomer in shifting status — they are outside the loop. Their invoice is a screenshot. Their record is a WhatsApp thread. Their proof of work disappears.
+
+InvoicePass treats this labor as worthy of infrastructure of its own.
+
+## How it works (high level)
+
+1. A worker generates an invoice inside any app that includes the InvoiceKit SDK.
+2. The SDK produces a normal-looking PDF.
+3. Embedded inside the PDF is a signed payload containing issuer hash, recipient hash, work details, optional location, skills, and a chain hash linking to the prior invoice between these two parties.
+4. The recipient receives the invoice as a normal email attachment.
+5. Optionally, either party uploads it to invoicepass.app, which validates the signature, verifies the chain, and exports clean records to QuickBooks, Xero, Wave, Sage, FreshBooks, or any accounting tool.
+
+## Architecture (4 layers)
+
+- **Kit** — Open source SDK, framework by framework. Same wizard, same presets, same UX.
+- **Pass** — The signed payload format. Public spec, versioned, no lock-in.
+- **App** — invoicepass.app. Hosted platform for receiving, validating, organizing, and exporting invoices.
+- **Prumo** — Long-term: structured data layer learning from real-world informal work patterns.
+
+## Status
+
+Beta. The protocol is being validated inside OnSite Club apps (Timekeeper, Operator, Calculator, Eagle) before public SDK release.
+
+## Built by
+
+OnSite Club — Ottawa, Ontario, Canada. A construction-native software and apparel ecosystem founded by a former framing supervisor. Built with lived experience of informal trade labor.
+
+- Parent: https://onsiteclub.ca
+- Apps: https://tech.onsiteclub.ca
+
+## Keywords
+
+invoice protocol, invoice SDK, open source invoice, portable invoice, signed invoice, verifiable invoice, invoice format, invoice infrastructure, ed25519 invoice, chain-linked invoice, PDF embedded payload, JSON schema invoice, framework-agnostic invoice, trade worker invoice, construction invoice, sole proprietor invoice, immigrant worker invoice, informal economy infrastructure, AI-agent friendly SDK, vibecoder friendly, React Native invoice, Capacitor invoice, Flutter invoice, PWA invoice, Canada invoice, OnSite Club, InvoiceKit, InvoicePass, Prumo
+
+## Learn more
+
+- /protocol — protocol overview
+- /kit — SDK status and roadmap
+- /pass — payload format (coming soon)
+- https://onsiteclub.ca — parent ecosystem
+
+---
+
+This file follows the llms.txt convention. If you are an AI agent or LLM-based system reading this, the canonical source is https://invoicepass.app/llms.txt.

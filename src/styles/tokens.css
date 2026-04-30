@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;450;500;600;700&family=JetBrains+Mono:wght@400;450;500&display=swap');
+
+:root {
+  --bg:        #FBFCFD;
+  --surface:   #FFFFFF;
+  --surface-2: #F4F7FA;
+  --surface-3: #EEF3F8;
+
+  --border:        #E5E9EE;
+  --border-strong: #D0D7DE;
+  --border-soft:   #F0F3F7;
+
+  --ink:    #0F1419;
+  --ink-2:  #2C3540;
+  --ink-3:  #5B6573;
+  --ink-4:  #8B95A3;
+  --ink-5:  #B8C0CB;
+  --ink-6:  #DCE2EA;
+
+  --blue:        #1E5FCC;
+  --blue-deep:   #163E84;
+  --blue-soft:   #DCE8FA;
+  --blue-faint:  #EDF3FC;
+
+  --amber:       #E8A33A;
+  --amber-soft:  #FDF3DF;
+
+  --green:       #18A957;
+  --green-soft:  #E4F6EC;
+
+  --red:         #DC4A4A;
+
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+
+  --radius:    6px;
+  --radius-lg: 10px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 20, 25, 0.04);
+  --shadow:    0 1px 3px rgba(15, 20, 25, 0.06), 0 4px 12px rgba(15, 20, 25, 0.04);
+  --shadow-lg: 0 4px 8px rgba(15, 20, 25, 0.04), 0 16px 40px rgba(15, 20, 25, 0.08);
+}

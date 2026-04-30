@@ -1,0 +1,58 @@
+.op-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+@media (max-width: 720px) {
+  .op-flow { grid-template-columns: 1fr; }
+}
+
+.op-flow-step {
+  padding: 32px 28px;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+
+.op-flow-step:last-child { border-right: 0; }
+
+@media (max-width: 720px) {
+  .op-flow-step { border-right: 0; border-bottom: 1px solid var(--border); }
+  .op-flow-step:last-child { border-bottom: 0; }
+}
+
+.op-flow-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--blue);
+  margin-bottom: 18px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.op-flow-title {
+  font-size: 18px;
+  color: var(--ink);
+  font-weight: 500;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.op-flow-desc {
+  font-size: 14px;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+.op-flow-desc .mono {
+  color: var(--blue);
+  font-size: 12.5px;
+  background: var(--blue-faint);
+  padding: 1px 6px;
+  border-radius: 3px;
+  word-break: break-all;
+}

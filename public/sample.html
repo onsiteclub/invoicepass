@@ -1,0 +1,2792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InvoicePass — Inbound infrastructure for invoices</title>
+<meta name="description" content="The invoice ingestion layer. SMTP ingress, deterministic dedup, signed delivery. Built for operators who can't lose a single invoice.">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;450;500;600;700&family=JetBrains+Mono:wght@400;450;500&display=swap');
+
+  :root {
+    --bg:        #FBFCFD;
+    --surface:   #FFFFFF;
+    --surface-2: #F4F7FA;
+    --surface-3: #EEF3F8;
+
+    --border:        #E5E9EE;
+    --border-strong: #D0D7DE;
+    --border-soft:   #F0F3F7;
+
+    --ink:    #0F1419;
+    --ink-2:  #2C3540;
+    --ink-3:  #5B6573;
+    --ink-4:  #8B95A3;
+    --ink-5:  #B8C0CB;
+    --ink-6:  #DCE2EA;
+
+    --blue:        #1E5FCC;
+    --blue-deep:   #163E84;
+    --blue-soft:   #DCE8FA;
+    --blue-faint:  #EDF3FC;
+
+    --amber:       #E8A33A;
+    --amber-soft:  #FDF3DF;
+
+    --green:       #18A957;
+    --green-soft:  #E4F6EC;
+
+    --red:         #DC4A4A;
+
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+
+    --radius:    6px;
+    --radius-lg: 10px;
+
+    --shadow-sm: 0 1px 2px rgba(15, 20, 25, 0.04);
+    --shadow:    0 1px 3px rgba(15, 20, 25, 0.06), 0 4px 12px rgba(15, 20, 25, 0.04);
+    --shadow-lg: 0 4px 8px rgba(15, 20, 25, 0.04), 0 16px 40px rgba(15, 20, 25, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-feature-settings: "ss01", "ss02", "cv11";
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--amber-soft); color: var(--ink); }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ─────── EASTER EGG: amber dot after every <h1> and <h2> ─────── */
+  h1::after {
+    content: '';
+    display: inline-block;
+    width: 0.32em;
+    height: 0.32em;
+    background: var(--amber);
+    border-radius: 50%;
+    margin-left: 0.18em;
+    margin-bottom: 0.05em;
+    vertical-align: baseline;
+  }
+
+  h2::after {
+    content: '';
+    display: inline-block;
+    width: 0.22em;
+    height: 0.22em;
+    background: var(--amber);
+    border-radius: 50%;
+    margin-left: 0.14em;
+    margin-bottom: 0.04em;
+    vertical-align: baseline;
+  }
+
+  /* CTA section h2 stays without the dot — it's on dark bg with its own logic */
+  .cta-section h2::after { display: none; }
+
+  /* ─────── TYPOGRAPHY ─────── */
+  h1 { font-size: clamp(40px, 5.5vw, 68px); font-weight: 500; letter-spacing: -0.025em; line-height: 1.04; }
+  h2 { font-size: clamp(28px, 3.2vw, 40px); font-weight: 500; letter-spacing: -0.018em; line-height: 1.12; }
+  h3 { font-size: 18px; font-weight: 500; letter-spacing: -0.005em; line-height: 1.3; }
+
+  .mono { font-family: var(--font-mono); font-feature-settings: "calt", "ss02"; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    font-weight: 450;
+  }
+
+  .eyebrow .blue-dot {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--blue);
+    margin-right: 8px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+
+  /* ─────── LAYOUT ─────── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  @media (max-width: 720px) {
+    .container { padding: 0 20px; }
+  }
+
+  /* ─────── NAV ─────── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(251, 252, 253, 0.85);
+    backdrop-filter: saturate(1.6) blur(12px);
+    -webkit-backdrop-filter: saturate(1.6) blur(12px);
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+  }
+
+  .nav-left { display: flex; align-items: center; gap: 36px; }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15.5px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 26px;
+  }
+
+  .nav-links a {
+    font-size: 13.5px;
+    color: var(--ink-3);
+    font-weight: 450;
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 11px 5px 9px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+    background: var(--surface);
+  }
+
+  .status-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(24, 169, 87, 0.5);
+    animation: pulse-green 2.4s ease-out infinite;
+  }
+
+  @keyframes pulse-green {
+    0%   { box-shadow: 0 0 0 0 rgba(24, 169, 87, 0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(24, 169, 87, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(24, 169, 87, 0); }
+  }
+
+  @media (max-width: 720px) {
+    .nav-links, .status-pill { display: none; }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    font-family: inherit;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--surface);
+  }
+
+  .btn-primary:hover { background: var(--ink-2); }
+
+  .btn-ghost {
+    color: var(--ink-2);
+    background: transparent;
+  }
+
+  .btn-ghost:hover { background: var(--surface-2); }
+
+  /* ─────── HERO ─────── */
+  .hero {
+    padding: 96px 0 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 72px;
+    align-items: center;
+  }
+
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    .hero { padding: 56px 0 56px; }
+  }
+
+  .hero-eyebrow { margin-bottom: 28px; }
+
+  .hero h1 {
+    margin-bottom: 24px;
+    color: var(--ink);
+  }
+
+  .hero h1 .accent {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+
+  .primary-blue {
+    color: var(--blue);
+  }
+
+  .hero-sub {
+    font-size: 18.5px;
+    color: var(--ink-3);
+    line-height: 1.55;
+    max-width: 540px;
+    margin-bottom: 36px;
+  }
+
+  /* claim form — label + how-it-works link */
+  .claim-wrap { max-width: 480px; }
+
+  .claim-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+
+  .claim-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    font-weight: 450;
+  }
+
+  .how-link {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ink-3);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.15s;
+  }
+
+  .how-link:hover { color: var(--blue); }
+
+  .how-link-dark { color: var(--ink-5); }
+  .how-link-dark:hover { color: var(--surface); }
+
+  .claim-label-row-dark .claim-label { color: var(--ink-5); }
+
+  .claim-suffix {
+    color: var(--ink-3);
+    font-size: 13px;
+    font-weight: 450;
+    letter-spacing: -0.005em;
+  }
+
+  /* claim form */
+  .claim {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 7px 7px 7px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 480px;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .claim:focus-within {
+    border-color: var(--ink-4);
+    box-shadow: var(--shadow);
+  }
+
+  .claim input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--ink);
+    padding: 10px 0;
+    letter-spacing: -0.005em;
+  }
+
+  .claim input::placeholder { color: var(--ink-5); }
+
+  .claim button {
+    padding: 10px 18px;
+    background: var(--ink);
+    color: var(--surface);
+    border: 0;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .claim button:hover { background: var(--ink-2); }
+
+  .claim-note {
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--ink-4);
+    font-family: var(--font-mono);
+  }
+
+  .claim-note .check {
+    color: var(--green);
+    margin-right: 4px;
+  }
+
+  /* live telemetry panel */
+  .telemetry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .tel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+
+  .tel-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+
+  .tel-header-left .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: pulse-red 1.6s ease-out infinite;
+  }
+
+  @keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+
+  .tel-window-controls {
+    display: flex;
+    gap: 5px;
+  }
+
+  .tel-window-controls span {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--border-strong);
+  }
+
+  .tel-stream {
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12.2px;
+    line-height: 1.85;
+    color: var(--ink-2);
+    height: 296px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .tel-stream::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, var(--surface));
+    pointer-events: none;
+  }
+
+  .tel-line {
+    display: grid;
+    grid-template-columns: 70px 22px 1fr;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  .tel-time { color: var(--ink-5); }
+  .tel-meth { color: var(--blue); font-weight: 500; }
+  .tel-meth.ok { color: var(--green); }
+  .tel-meth.warn { color: var(--amber); }
+
+  .tel-msg .hash { color: var(--ink-4); }
+  .tel-msg .num { color: var(--ink); font-weight: 500; }
+
+  .tel-footer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--border);
+  }
+
+  .tel-stat {
+    padding: 14px 16px;
+    border-right: 1px solid var(--border);
+  }
+
+  .tel-stat:last-child { border-right: 0; }
+
+  .tel-stat-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    margin-bottom: 4px;
+  }
+
+  .tel-stat-val {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tel-stat-val .unit {
+    font-size: 11.5px;
+    color: var(--ink-4);
+    font-weight: 400;
+    margin-left: 2px;
+  }
+
+  /* ─────── BAND: trust strip ─────── */
+  .trust-band {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 0;
+    background: var(--surface-2);
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  @media (max-width: 720px) {
+    .trust-grid { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  .trust-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-4);
+  }
+
+  .trust-items {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .trust-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 450;
+  }
+
+  .trust-item svg { color: var(--ink-4); flex-shrink: 0; }
+
+  /* ─────── SECTION ─────── */
+  section.spaced { padding: 120px 0; }
+
+  @media (max-width: 720px) {
+    section.spaced { padding: 72px 0; }
+  }
+
+  .section-head {
+    max-width: 680px;
+    margin-bottom: 64px;
+  }
+
+  .section-head .eyebrow { display: block; margin-bottom: 16px; }
+
+  .section-head h2 {
+    margin-bottom: 18px;
+  }
+
+  .section-head h2 .accent {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+
+  .section-head p {
+    font-size: 17px;
+    color: var(--ink-3);
+    line-height: 1.55;
+  }
+
+  /* ─────── FLOW DIAGRAM ─────── */
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  @media (max-width: 880px) {
+    .flow { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 540px) {
+    .flow { grid-template-columns: 1fr; }
+  }
+
+  .flow-step {
+    padding: 28px 24px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .flow-step:last-child { border-right: 0; }
+
+  @media (max-width: 880px) {
+    .flow-step:nth-child(2) { border-right: 0; }
+    .flow-step:nth-child(1), .flow-step:nth-child(2) {
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
+  @media (max-width: 540px) {
+    .flow-step { border-right: 0; border-bottom: 1px solid var(--border); }
+    .flow-step:last-child { border-bottom: 0; }
+  }
+
+  .flow-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+    margin-bottom: 24px;
+    letter-spacing: 0.05em;
+  }
+
+  .flow-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    background: var(--blue-faint);
+    color: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .flow-title {
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 6px;
+    letter-spacing: -0.005em;
+  }
+
+  .flow-desc {
+    font-size: 13px;
+    color: var(--ink-3);
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+
+  .flow-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+    line-height: 1.55;
+  }
+
+  /* ─────── CODE BLOCK ─────── */
+  .code-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  @media (max-width: 880px) {
+    .code-grid { grid-template-columns: 1fr; gap: 32px; }
+  }
+
+  .code-text h3 {
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+
+  .code-text p {
+    font-size: 15.5px;
+    color: var(--ink-3);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .code-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    list-style: none;
+  }
+
+  .code-list li {
+    display: grid;
+    grid-template-columns: 16px 1fr;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+
+  .code-list svg { color: var(--green); margin-top: 4px; }
+
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .code-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+
+  .code-tab {
+    padding: 11px 18px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-4);
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+    border-right: 1px solid var(--border);
+    transition: color 0.15s;
+  }
+
+  .code-tab:hover { color: var(--ink-2); }
+  .code-tab.active { color: var(--ink); background: var(--surface); position: relative; }
+  .code-tab.active::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -1px 0;
+    height: 1.5px;
+    background: var(--ink);
+  }
+
+  .code-tab-spacer { flex: 1; border-right: 0 !important; }
+
+  .copy-btn {
+    padding: 11px 14px;
+    background: transparent;
+    border: 0;
+    color: var(--ink-4);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+
+  .copy-btn:hover { color: var(--ink); }
+  .copy-btn.copied { color: var(--green); }
+
+  .code-body {
+    padding: 22px 24px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: var(--ink-2);
+    overflow-x: auto;
+  }
+
+  .code-body .com  { color: var(--ink-4); font-style: italic; }
+  .code-body .key  { color: var(--blue); }
+  .code-body .str  { color: #1B7F4A; }
+  .code-body .pun  { color: var(--ink-4); }
+  .code-body .num  { color: var(--amber); }
+  .code-body .ind  { display: inline-block; width: 1em; }
+
+  .code-pane { display: none; }
+  .code-pane.active { display: block; }
+
+  /* ─────── STATUS PAGE ─────── */
+  .status-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .status-card-head {
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .status-card-head h3 { font-size: 16px; }
+
+  .status-overall {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  .status-overall .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .status-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 110px 80px;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border-soft);
+    gap: 24px;
+  }
+
+  .status-row:last-child { border-bottom: 0; }
+
+  @media (max-width: 720px) {
+    .status-row { grid-template-columns: 1fr 60px; }
+    .status-row .uptime-bar, .status-row .latency { display: none; }
+  }
+
+  .status-svc {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .status-svc-name {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 450;
+  }
+
+  .status-svc-desc {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+  }
+
+  .uptime-bar {
+    display: flex;
+    gap: 2px;
+    height: 22px;
+    align-items: stretch;
+  }
+
+  .uptime-tick {
+    flex: 1;
+    background: var(--green);
+    border-radius: 1px;
+    opacity: 0.78;
+  }
+
+  .uptime-tick.partial { background: var(--amber); }
+  .uptime-tick.down    { background: var(--red); }
+
+  .latency {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status-state {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ─────── QUOTE ─────── */
+  .quote-section {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .quote-section blockquote {
+    font-size: clamp(22px, 2.4vw, 30px);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--ink);
+    letter-spacing: -0.012em;
+    margin-bottom: 28px;
+  }
+
+  .quote-section blockquote::before { content: '"'; color: var(--ink-5); }
+  .quote-section blockquote::after  { content: '"'; color: var(--ink-5); }
+
+  .quote-attr {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-4);
+    letter-spacing: 0.04em;
+  }
+
+  /* ─────── CTA ─────── */
+  .cta-section {
+    background: var(--ink);
+    color: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 72px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  @media (max-width: 720px) {
+    .cta-section { padding: 48px 28px; }
+  }
+
+  .cta-section h2 { color: var(--surface); margin-bottom: 16px; }
+  .cta-section h2 .accent { font-style: italic; font-weight: 400; color: var(--ink-5); }
+  .cta-section p { color: var(--ink-5); font-size: 17px; line-height: 1.55; max-width: 540px; margin-bottom: 36px; }
+
+  .cta-section .claim {
+    background: var(--surface);
+    border-color: var(--surface);
+  }
+
+  /* faint grid pattern in CTA bg */
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .cta-section > * { position: relative; }
+
+  /* ─────── FOOTER ─────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 64px 0 36px;
+    margin-top: 80px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 56px;
+  }
+
+  @media (max-width: 880px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  }
+
+  .footer-brand-text {
+    font-size: 13.5px;
+    color: var(--ink-3);
+    line-height: 1.55;
+    margin-top: 16px;
+    max-width: 280px;
+  }
+
+  .footer-col h4 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-4);
+    font-weight: 450;
+    margin-bottom: 16px;
+  }
+
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .footer-col a {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    transition: color 0.15s;
+  }
+
+  .footer-col a:hover { color: var(--ink); }
+
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-4);
+  }
+
+  .footer-bottom-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  /* ─────── PERSONA SYSTEM ─────── */
+  .dev-only, .op-only { display: none; }
+  body.persona-dev .dev-only { display: revert; }
+  body.persona-op  .op-only  { display: revert; }
+  /* block-level overrides for layout sections */
+  body.persona-dev section.dev-only { display: block; }
+  body.persona-op  section.op-only  { display: block; }
+  body.persona-dev .hero.dev-only,
+  body.persona-op  .hero.op-only { display: block; }
+
+  /* ─────── PERSONA MODAL ─────── */
+  .persona-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 20, 25, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .persona-modal.open { opacity: 1; pointer-events: auto; }
+
+  .persona-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 56px 48px 48px;
+    width: 100%;
+    max-width: 720px;
+    box-shadow: 0 24px 80px rgba(15, 20, 25, 0.18), 0 4px 12px rgba(15, 20, 25, 0.08);
+    transform: translateY(16px) scale(0.97);
+    transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .persona-modal.open .persona-card {
+    transform: translateY(0) scale(1);
+  }
+
+  /* faint grid background inside card */
+  .persona-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(15, 20, 25, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 20, 25, 0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
+
+  .persona-card > * { position: relative; }
+
+  .persona-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--ink);
+    margin-bottom: 36px;
+  }
+
+  .persona-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    margin-bottom: 12px;
+  }
+
+  .persona-eyebrow .blue-dot {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--blue);
+    margin-right: 8px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+
+  .persona-card h2 {
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.15;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .persona-card h2::after { display: none; }
+
+  .persona-card h2 .accent { font-style: italic; font-weight: 400; color: var(--ink-3); }
+  .persona-card h2 .primary-blue { color: var(--blue); }
+
+  .persona-sub {
+    font-size: 15px;
+    color: var(--ink-3);
+    margin-bottom: 36px;
+    max-width: 560px;
+    line-height: 1.55;
+  }
+
+  .persona-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 600px) {
+    .persona-options { grid-template-columns: 1fr; }
+    .persona-card { padding: 36px 24px 28px; }
+  }
+
+  .persona-option {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 22px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+  }
+
+  .persona-option:hover {
+    border-color: var(--ink-3);
+    background: var(--surface);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 20, 25, 0.06);
+  }
+
+  .persona-option-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--blue-faint);
+    color: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .persona-option:nth-child(2) .persona-option-icon {
+    background: var(--amber-soft);
+    color: #B07A1F;
+  }
+
+  .persona-option-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+
+  .persona-option-sub {
+    font-size: 13px;
+    color: var(--ink-3);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .persona-option-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-soft);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    transition: color 0.2s;
+  }
+
+  .persona-option:hover .persona-option-arrow { color: var(--ink-2); }
+
+  .persona-option-arrow svg {
+    transition: transform 0.2s;
+  }
+
+  .persona-option:hover .persona-option-arrow svg {
+    transform: translateX(3px);
+  }
+
+  .persona-foot {
+    margin-top: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  /* persona switcher in nav */
+  .persona-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .persona-switch:hover { border-color: var(--ink-4); color: var(--ink); }
+
+  .persona-switch .swap-icon {
+    width: 11px;
+    height: 11px;
+    color: var(--ink-4);
+  }
+
+  /* ─────── OPERATOR INBOX MOCK ─────── */
+  .inbox-mock {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .inbox-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .inbox-head-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .inbox-head-left .inbox-name {
+    font-family: var(--font-mono);
+    color: var(--blue);
+    font-weight: 500;
+  }
+
+  .inbox-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .inbox-list {
+    max-height: 400px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .inbox-list::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, var(--surface));
+    pointer-events: none;
+  }
+
+  .inbox-item {
+    display: grid;
+    grid-template-columns: 26px 1fr auto auto;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    align-items: center;
+    transition: background 0.15s;
+  }
+
+  .inbox-item:hover { background: var(--surface-2); }
+
+  .inbox-item.new { animation: inbox-new 0.6s ease; }
+
+  @keyframes inbox-new {
+    0% { background: var(--blue-faint); transform: translateX(-6px); opacity: 0; }
+    50% { background: var(--blue-faint); transform: translateX(0); opacity: 1; }
+    100% { background: transparent; }
+  }
+
+  .inbox-pdf-icon {
+    width: 26px;
+    height: 32px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    position: relative;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--red);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 3px;
+    font-weight: 500;
+  }
+
+  .inbox-pdf-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .inbox-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .inbox-vendor {
+    font-size: 13.5px;
+    color: var(--ink);
+    font-weight: 450;
+    letter-spacing: -0.005em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .inbox-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+  }
+
+  .inbox-amount {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .inbox-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .inbox-status.signed { background: var(--green-soft); color: var(--green); }
+  .inbox-status.dup    { background: var(--amber-soft); color: #A77519; }
+
+  .inbox-status .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ─────── SECURITY GUIDANCE: simple how it works for op ─────── */
+  .op-flow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  @media (max-width: 720px) {
+    .op-flow { grid-template-columns: 1fr; }
+  }
+
+  .op-flow-step {
+    padding: 32px 28px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .op-flow-step:last-child { border-right: 0; }
+
+  @media (max-width: 720px) {
+    .op-flow-step { border-right: 0; border-bottom: 1px solid var(--border); }
+    .op-flow-step:last-child { border-bottom: 0; }
+  }
+
+  .op-flow-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--blue);
+    margin-bottom: 18px;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+
+  .op-flow-title {
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .op-flow-desc {
+    font-size: 14px;
+    color: var(--ink-3);
+    line-height: 1.6;
+  }
+
+  .op-flow-desc .mono {
+    color: var(--blue);
+    font-size: 12.5px;
+    background: var(--blue-faint);
+    padding: 1px 6px;
+    border-radius: 3px;
+    word-break: break-all;
+  }
+
+  /* ─────── HOW-IT-WORKS MODAL ─────── */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 20, 25, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 440px;
+    overflow: hidden;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  .modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+
+  .modal-head {
+    padding: 20px 22px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-head h3 {
+    font-size: 15.5px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+
+  .modal-close {
+    background: transparent;
+    border: 0;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--ink-4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { color: var(--ink); background: var(--surface-2); }
+
+  .modal-body {
+    padding: 6px 22px 4px;
+  }
+
+  .modal-step {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .modal-step:last-child { border-bottom: 0; }
+
+  .modal-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--blue-faint);
+    color: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 1px;
+  }
+
+  .modal-step-title {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+
+  .modal-step-desc {
+    font-size: 13px;
+    color: var(--ink-3);
+    line-height: 1.55;
+  }
+
+  .modal-step-desc .mono {
+    color: var(--blue);
+    font-size: 12.5px;
+    background: var(--blue-faint);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .modal-foot {
+    padding: 14px 22px;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─────── SUCCESS STATE OVERLAY ─────── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--surface);
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast .check {
+    color: var(--green);
+  }
+
+  /* claim success modal */
+  .claim-success {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-top: 24px;
+    box-shadow: var(--shadow);
+    display: none;
+    max-width: 520px;
+  }
+
+  .claim-success.shown { display: block; animation: fadeUp 0.4s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .claim-success-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .claim-success-head svg { color: var(--green); }
+  .claim-success-head span { font-weight: 500; font-size: 14px; }
+
+  .claim-handle-row {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    color: var(--ink);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .claim-handle-row .label {
+    font-size: 10.5px;
+    color: var(--ink-4);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 10px;
+  }
+
+  .claim-handle-row .handle { color: var(--blue); font-weight: 500; }
+
+  .claim-success-info {
+    font-size: 13px;
+    color: var(--ink-3);
+    line-height: 1.55;
+    margin-bottom: 18px;
+  }
+
+  .open-portal {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ink);
+    color: var(--surface);
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+
+  .open-portal:hover { background: var(--ink-2); }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════ PERSONA MODAL (first visit) ════════════════════════ -->
+<div class="persona-modal" id="personaModal" role="dialog" aria-modal="true" aria-labelledby="personaTitle">
+  <div class="persona-card">
+    <div class="persona-brand">
+      <svg width="24" height="19" viewBox="-14 -6 64 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="0" y="0" width="42" height="32" rx="3" fill="none" stroke="#0F1419" stroke-width="2.5"/>
+        <path d="M 3 3 L 21 18 L 39 3" fill="none" stroke="#0F1419" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="44" cy="-2" r="6" fill="#FFFFFF"/>
+        <circle cx="44" cy="-2" r="4.5" fill="#E8A33A"/>
+      </svg>
+      InvoicePass
+    </div>
+
+    <div class="persona-eyebrow"><span class="blue-dot"></span>Welcome</div>
+    <h2 id="personaTitle"><span class="primary-blue">Built for two kinds of people.</span> <span class="accent">Pick yours.</span></h2>
+    <p class="persona-sub">The same protocol underneath — different surfaces above. You can switch later.</p>
+
+    <div class="persona-options">
+      <button class="persona-option" data-persona="dev">
+        <div class="persona-option-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </div>
+        <div>
+          <div class="persona-option-title">I'm a developer</div>
+          <p class="persona-option-sub">Connect via API. Receive signed invoices, ingest at scale, build on top of the protocol.</p>
+        </div>
+        <div class="persona-option-arrow">
+          <span>SMTP · API · Webhooks</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </button>
+
+      <button class="persona-option" data-persona="op">
+        <div class="persona-option-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="persona-option-title">I'm an operator</div>
+          <p class="persona-option-sub">Run a business. Get every invoice in one inbox — signed, deduped, organized. No code needed.</p>
+        </div>
+        <div class="persona-option-arrow">
+          <span>Inbox · Portal · Exports</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </button>
+    </div>
+
+    <p class="persona-foot">You can switch view anytime from the top bar</p>
+  </div>
+</div>
+
+<!-- ════════════════════════ NAV ════════════════════════ -->
+<nav>
+  <div class="container nav-row">
+    <div class="nav-left">
+      <a href="/" class="logo">
+        <svg width="28" height="22" viewBox="-14 -6 64 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="0" y="0" width="42" height="32" rx="3" fill="none" stroke="#0F1419" stroke-width="2.5"/>
+          <path d="M 3 3 L 21 18 L 39 3" fill="none" stroke="#0F1419" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="-12" y1="10" x2="-3" y2="10" stroke="#1E5FCC" stroke-width="2" stroke-linecap="round"/>
+          <line x1="-16" y1="18" x2="-3" y2="18" stroke="#1E5FCC" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          <line x1="-12" y1="26" x2="-3" y2="26" stroke="#1E5FCC" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+          <circle cx="44" cy="-2" r="6" fill="#FBFCFD"/>
+          <circle cx="44" cy="-2" r="4.5" fill="#E8A33A"/>
+        </svg>
+        InvoicePass
+      </a>
+      <div class="nav-links">
+        <a href="#protocol">Protocol</a>
+        <a href="#integrate">Integrate</a>
+        <a href="#status">Status</a>
+        <a href="#" data-stub>Docs</a>
+        <a href="#" data-stub>Changelog</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button class="persona-switch" id="personaSwitch" type="button" title="Switch view">
+        <svg class="swap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        <span id="personaLabel">developer view</span>
+      </button>
+      <span class="status-pill">
+        <span class="dot"></span>
+        all systems operational
+      </span>
+      <a href="https://portal.invoicepass.app" class="btn btn-ghost">Sign in</a>
+      <a href="#claim" class="btn btn-primary">Get access</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════ HERO — DEVELOPER ════════════════════════ -->
+<section class="hero dev-only">
+  <div class="container">
+    <div class="hero-grid">
+
+      <div>
+        <div class="hero-eyebrow eyebrow"><span class="blue-dot"></span>v1.4 — inbound endpoint</div>
+
+        <h1><span class="primary-blue">The invoice</span> <span class="accent">ingestion layer</span></h1>
+
+        <p class="hero-sub">
+          One inbox per operator. SMTP ingress, deterministic deduplication, signed delivery to your stack — so no invoice ever lands in the wrong place, twice, or not at all.
+        </p>
+
+        <div class="claim-wrap">
+          <div class="claim-label-row">
+            <span class="claim-label">Your inbox name</span>
+            <button type="button" class="how-link" id="howLinkTop">
+              How does this work?
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </button>
+          </div>
+          <form class="claim" id="claimForm" autocomplete="off">
+            <input
+              id="handleInput"
+              type="text"
+              placeholder="silva"
+              spellcheck="false"
+              autocapitalize="none"
+            />
+            <span class="mono claim-suffix">@invoicepass.app</span>
+            <button type="submit">Claim →</button>
+          </form>
+        </div>
+
+        <div class="claim-note">
+          <span class="check">✓</span>
+          Free up to 10 users · No credit card · One inbox per operator
+        </div>
+
+        <div class="claim-success" id="claimSuccess">
+          <div class="claim-success-head">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>Inbox reserved</span>
+          </div>
+          <div class="claim-handle-row">
+            <span><span class="label">your address</span><span class="handle" id="handleResult">silva</span><span style="color: var(--ink-4)">@invoicepass.app</span></span>
+            <span style="color: var(--green); font-family: var(--font-mono); font-size: 11px;">● live</span>
+          </div>
+          <p class="claim-success-info">
+            Send or forward invoices to <span class="mono" style="color: var(--ink-2);"><span id="handleEmail">silva</span>@invoicepass.app</span> and they'll land in your portal — signed, deduped, delivered. Access details have been queued for delivery.
+          </p>
+          <a href="https://portal.invoicepass.app" class="open-portal">
+            Open portal
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Live telemetry panel -->
+      <div class="telemetry">
+        <div class="tel-header">
+          <div class="tel-header-left">
+            <span class="live-dot"></span>
+            LIVE · global ingress
+          </div>
+          <div class="tel-window-controls">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="tel-stream" id="telStream">
+          <!-- populated by JS -->
+        </div>
+        <div class="tel-footer">
+          <div class="tel-stat">
+            <div class="tel-stat-label">Today</div>
+            <div class="tel-stat-val" id="statToday">14,827</div>
+          </div>
+          <div class="tel-stat">
+            <div class="tel-stat-label">P95 latency</div>
+            <div class="tel-stat-val" id="statLatency">142<span class="unit">ms</span></div>
+          </div>
+          <div class="tel-stat">
+            <div class="tel-stat-label">Dedup rate</div>
+            <div class="tel-stat-val" id="statDedup">3.4<span class="unit">%</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ HERO — OPERATOR ════════════════════════ -->
+<section class="hero op-only">
+  <div class="container">
+    <div class="hero-grid">
+
+      <div>
+        <div class="hero-eyebrow eyebrow"><span class="blue-dot"></span>For operators</div>
+
+        <h1><span class="primary-blue">Every invoice you get.</span> <span class="accent">In one signed inbox</span></h1>
+
+        <p class="hero-sub">
+          Forward invoices from anywhere — Gmail, Outlook, vendor portals. They're parsed, deduped, and organized in your portal. Without spreadsheets. Without lost attachments. Exactly once.
+        </p>
+
+        <div class="claim-wrap">
+          <div class="claim-label-row">
+            <span class="claim-label">Your inbox name</span>
+            <button type="button" class="how-link" id="howLinkOp">
+              How does this work?
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </button>
+          </div>
+          <form class="claim" id="claimFormOp" autocomplete="off">
+            <input
+              id="handleInputOp"
+              type="text"
+              placeholder="silva"
+              spellcheck="false"
+              autocapitalize="none"
+            />
+            <span class="mono claim-suffix">@invoicepass.app</span>
+            <button type="submit">Claim →</button>
+          </form>
+        </div>
+
+        <div class="claim-note">
+          <span class="check">✓</span>
+          Free up to 10 users · No credit card · One inbox per operator
+        </div>
+
+        <div class="claim-success" id="claimSuccessOp">
+          <div class="claim-success-head">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>Inbox reserved</span>
+          </div>
+          <div class="claim-handle-row">
+            <span><span class="label">your address</span><span class="handle" id="handleResultOp">silva</span><span style="color: var(--ink-4)">@invoicepass.app</span></span>
+            <span style="color: var(--green); font-family: var(--font-mono); font-size: 11px;">● live</span>
+          </div>
+          <p class="claim-success-info">
+            Send or forward invoices to <span class="mono" style="color: var(--ink-2);"><span id="handleEmailOp">silva</span>@invoicepass.app</span> and they'll land in your portal. Access details have been queued for delivery.
+          </p>
+          <a href="https://portal.invoicepass.app" class="open-portal">
+            Open portal
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Inbox mock panel -->
+      <div class="inbox-mock">
+        <div class="inbox-head">
+          <div class="inbox-head-left">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span class="inbox-name">silva@invoicepass.app</span>
+          </div>
+          <span class="inbox-count" id="inboxCount">12 invoices</span>
+        </div>
+        <div class="inbox-list" id="inboxList">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ TRUST BAND ════════════════════════ -->
+<div class="trust-band">
+  <div class="container">
+    <div class="trust-grid">
+      <span class="trust-label">Built on</span>
+      <div class="trust-items">
+        <span class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          TLS 1.3 end-to-end
+        </span>
+        <span class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/></svg>
+          SPF · DKIM · DMARC validated
+        </span>
+        <span class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Idempotent · Message-ID
+        </span>
+        <span class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          Encrypted at rest · AES-256
+        </span>
+        <span class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          SOC 2 Type II — in audit
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ PIPELINE — DEV ════════════════════════ -->
+<section class="spaced dev-only" id="protocol">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="blue-dot"></span>The pipeline</span>
+      <h2><span class="primary-blue">Four stages between an email</span> <span class="accent">and your system of record</span></h2>
+      <p>Every invoice that arrives in an InvoicePass inbox passes through the same deterministic pipeline. No queues you have to manage. No webhooks you have to retry. The protocol is the contract.</p>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">[01]</div>
+        <div class="flow-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="flow-title">SMTP inbound</div>
+        <div class="flow-desc">Authenticated mail accepted from any sender. MIME parsed, attachments extracted, headers preserved.</div>
+        <div class="flow-meta">// MIME · DKIM · threading</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">[02]</div>
+        <div class="flow-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="flow-title">PDF extract</div>
+        <div class="flow-desc">Metadata pulled via XMP, then subject line, then sender heuristics. Fallback cascade resolves 99.2% of invoices.</div>
+        <div class="flow-meta">// XMP · subject · heuristic</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">[03]</div>
+        <div class="flow-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div class="flow-title">Three-signal dedup</div>
+        <div class="flow-desc">SHA-256 hash, invoice number, and amount window cross-checked against your last 12 months. Duplicates flagged, not silently dropped.</div>
+        <div class="flow-meta">// hash · number · amount</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">[04]</div>
+        <div class="flow-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="flow-title">Signed delivery</div>
+        <div class="flow-desc">A signed URL pushed to your endpoint. TLS-only, TTL one hour, replay-safe. Or stays in the portal for human review.</div>
+        <div class="flow-meta">// webhook · TTL 1h · TLS</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ INTEGRATE — DEV ════════════════════════ -->
+<section class="spaced dev-only" id="integrate" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="blue-dot"></span>Integrate</span>
+      <h2><span class="primary-blue">One endpoint.</span> <span class="accent">Five lines of code</span></h2>
+      <p>If you can receive a webhook, you can ingest invoices. If you can't, route to your portal inbox and triage there. No SDK required, no vendor lock.</p>
+    </div>
+
+    <div class="code-grid">
+      <div class="code-text">
+        <h3>POST /api/v1/inbox</h3>
+        <p>Subscribe your endpoint. We deliver each invoice with a signed payload, a deterministic ID, and full audit trail. Idempotent by Message-ID — replay anytime.</p>
+        <ul class="code-list">
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Bearer auth, timing-safe comparison
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Exponential backoff, 24h retry window
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Quota: 50 PDFs / operator / month during beta
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Storage in ca-central-1 · data residency on request
+          </li>
+        </ul>
+      </div>
+
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-tab="curl">cURL</button>
+          <button class="code-tab" data-tab="node">Node.js</button>
+          <button class="code-tab" data-tab="python">Python</button>
+          <span class="code-tab code-tab-spacer"></span>
+          <button class="copy-btn" id="copyBtn">copy</button>
+        </div>
+
+        <div class="code-pane active" data-pane="curl">
+<pre class="code-body"><span class="com"># subscribe a webhook to receive parsed invoices</span>
+curl <span class="key">-X</span> POST https://api.invoicepass.app/v1/inbox <span class="pun">\</span>
+  <span class="key">-H</span> <span class="str">"Authorization: Bearer ipk_live_<span class="num">7f3a</span>..."</span> <span class="pun">\</span>
+  <span class="key">-H</span> <span class="str">"Content-Type: application/json"</span> <span class="pun">\</span>
+  <span class="key">-d</span> <span class="str">'{
+    "endpoint": "https://api.acme.co/invoices",
+    "events": ["invoice.received", "invoice.duplicate"],
+    "format": "v1"
+  }'</span>
+
+<span class="com"># →</span> {<span class="key">"id"</span><span class="pun">:</span> <span class="str">"sub_8ZqK..."</span><span class="pun">,</span> <span class="key">"status"</span><span class="pun">:</span> <span class="str">"active"</span>}</pre>
+        </div>
+
+        <div class="code-pane" data-pane="node">
+<pre class="code-body"><span class="key">import</span> { InvoicePass } <span class="key">from</span> <span class="str">"invoicepass"</span>;
+
+<span class="key">const</span> ip = <span class="key">new</span> <span class="num">InvoicePass</span>(process.env.IPK);
+
+<span class="key">await</span> ip.inbox.subscribe({
+<span class="ind"></span>endpoint<span class="pun">:</span> <span class="str">"https://api.acme.co/invoices"</span><span class="pun">,</span>
+<span class="ind"></span>events<span class="pun">:</span> [<span class="str">"invoice.received"</span><span class="pun">,</span> <span class="str">"invoice.duplicate"</span>]<span class="pun">,</span>
+<span class="ind"></span>format<span class="pun">:</span> <span class="str">"v1"</span>
+});
+
+<span class="com">// invoices arrive at /invoices, signed and deduped</span></pre>
+        </div>
+
+        <div class="code-pane" data-pane="python">
+<pre class="code-body"><span class="key">from</span> invoicepass <span class="key">import</span> InvoicePass
+
+ip = <span class="num">InvoicePass</span>(api_key=os.getenv(<span class="str">"IPK"</span>))
+
+ip.inbox.subscribe(
+<span class="ind"></span>endpoint=<span class="str">"https://api.acme.co/invoices"</span><span class="pun">,</span>
+<span class="ind"></span>events=[<span class="str">"invoice.received"</span><span class="pun">,</span> <span class="str">"invoice.duplicate"</span>]<span class="pun">,</span>
+<span class="ind"></span>format=<span class="str">"v1"</span>
+)
+
+<span class="com"># signed, deduped, idempotent. that's it.</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ HOW IT WORKS — OPERATOR ════════════════════════ -->
+<section class="spaced op-only" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="blue-dot"></span>How it works</span>
+      <h2><span class="primary-blue">Three steps.</span> <span class="accent">No setup, no software</span></h2>
+      <p>You don't install anything. You don't configure DNS. You pick a name, give it to your vendors, and the inbox starts working.</p>
+    </div>
+
+    <div class="op-flow">
+      <div class="op-flow-step">
+        <div class="op-flow-num">[01]</div>
+        <div class="op-flow-title">Pick your inbox name</div>
+        <p class="op-flow-desc">Choose a short handle — for example <span class="mono">silva@invoicepass.app</span>. It's yours, it's permanent, it's free.</p>
+      </div>
+      <div class="op-flow-step">
+        <div class="op-flow-num">[02]</div>
+        <div class="op-flow-title">Send invoices to it</div>
+        <p class="op-flow-desc">Give the address to vendors. Or forward existing invoices from Gmail, Outlook, anywhere. PDFs are parsed automatically.</p>
+      </div>
+      <div class="op-flow-step">
+        <div class="op-flow-num">[03]</div>
+        <div class="op-flow-title">Review them in your portal</div>
+        <p class="op-flow-desc">Every invoice is signed, deduped, and organized by vendor. Export to your accountant when you're ready.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ QUOTE ════════════════════════ -->
+<section class="spaced">
+  <div class="container">
+    <div class="quote-section">
+      <blockquote>
+        We had three places invoices could land — Gmail, Drive, a shared inbox. InvoicePass collapsed all of it into one signed stream. We deleted a Zapier we'd been afraid to touch for two years.
+      </blockquote>
+      <div class="quote-attr">— Operations Lead · Series B SaaS · Toronto</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ STATUS ════════════════════════ -->
+<section class="spaced" id="status" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="blue-dot"></span>Status</span>
+      <h2><span class="primary-blue">Public uptime,</span> <span class="accent">real numbers</span></h2>
+      <p>Every service is monitored externally and reported here without filter. Last 90 days shown. Incidents disclosed within 15 minutes.</p>
+    </div>
+
+    <div class="status-card">
+      <div class="status-card-head">
+        <h3>Service health</h3>
+        <span class="status-overall"><span class="dot"></span>All systems operational</span>
+      </div>
+
+      <div class="status-row">
+        <div class="status-svc">
+          <div class="status-svc-name">Inbound (SMTP)</div>
+          <div class="status-svc-desc">smtp.invoicepass.app:587</div>
+        </div>
+        <div class="uptime-bar" data-pattern="all-good"></div>
+        <div class="latency">p95 · 142 ms</div>
+        <div class="status-state">healthy</div>
+      </div>
+
+      <div class="status-row">
+        <div class="status-svc">
+          <div class="status-svc-name">Parser</div>
+          <div class="status-svc-desc">PDF extraction service</div>
+        </div>
+        <div class="uptime-bar" data-pattern="one-blip"></div>
+        <div class="latency">p95 · 218 ms</div>
+        <div class="status-state">healthy</div>
+      </div>
+
+      <div class="status-row">
+        <div class="status-svc">
+          <div class="status-svc-name">Storage</div>
+          <div class="status-svc-desc">ca-central-1 · encrypted</div>
+        </div>
+        <div class="uptime-bar" data-pattern="all-good"></div>
+        <div class="latency">p95 · 64 ms</div>
+        <div class="status-state">healthy</div>
+      </div>
+
+      <div class="status-row">
+        <div class="status-svc">
+          <div class="status-svc-name">Portal</div>
+          <div class="status-svc-desc">portal.invoicepass.app</div>
+        </div>
+        <div class="uptime-bar" data-pattern="all-good"></div>
+        <div class="latency">p95 · 89 ms</div>
+        <div class="status-state">healthy</div>
+      </div>
+
+      <div class="status-row">
+        <div class="status-svc">
+          <div class="status-svc-name">Webhook delivery</div>
+          <div class="status-svc-desc">signed URL push</div>
+        </div>
+        <div class="uptime-bar" data-pattern="all-good"></div>
+        <div class="latency">p95 · 198 ms</div>
+        <div class="status-state">healthy</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ CTA ════════════════════════ -->
+<section class="spaced">
+  <div class="container">
+    <div class="cta-section">
+      <span class="eyebrow" style="color: var(--ink-5)"><span class="blue-dot"></span>Beta access</span>
+      <h2 style="margin-top: 16px;">Pick a name. <span class="accent">Start receiving invoices.</span></h2>
+      <p>Operators only. No marketing list. We onboard manually so the first invoice you send through InvoicePass works the way you'd expect — clean, signed, exactly once.</p>
+
+      <div class="claim-wrap">
+        <div class="claim-label-row claim-label-row-dark">
+          <span class="claim-label">Your inbox name</span>
+          <button type="button" class="how-link how-link-dark" id="howLinkBottom">
+            How does this work?
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </button>
+        </div>
+        <form class="claim" id="claimFormBottom" autocomplete="off">
+          <input type="text" placeholder="silva" spellcheck="false" autocapitalize="none" id="handleInputBottom"/>
+          <span class="mono claim-suffix">@invoicepass.app</span>
+          <button type="submit">Claim →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ FOOTER ════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" style="font-size: 14.5px;">
+          <svg width="24" height="19" viewBox="-14 -6 64 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="0" y="0" width="42" height="32" rx="3" fill="none" stroke="#0F1419" stroke-width="2.5"/>
+            <path d="M 3 3 L 21 18 L 39 3" fill="none" stroke="#0F1419" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="44" cy="-2" r="6" fill="#FBFCFD"/>
+            <circle cx="44" cy="-2" r="4.5" fill="#E8A33A"/>
+          </svg>
+          InvoicePass
+        </div>
+        <p class="footer-brand-text">
+          The invoice ingestion layer. Signed, deduped, delivered exactly once.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#protocol">Protocol</a></li>
+          <li><a href="#integrate">API</a></li>
+          <li><a href="#status">Status</a></li>
+          <li><a href="#" data-stub>Changelog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Developers</h4>
+        <ul>
+          <li><a href="#" data-stub>Documentation</a></li>
+          <li><a href="#" data-stub>API reference</a></li>
+          <li><a href="#" data-stub>Webhooks</a></li>
+          <li><a href="#" data-stub>SDKs</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#" data-stub>About</a></li>
+          <li><a href="#" data-stub>Customers</a></li>
+          <li><a href="#" data-stub>Careers</a></li>
+          <li><a href="#" data-stub>Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#" data-stub>Privacy</a></li>
+          <li><a href="#" data-stub>Terms</a></li>
+          <li><a href="#" data-stub>DPA</a></li>
+          <li><a href="#" data-stub>Security</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 InvoicePass · v1.4.2 · ca-central-1</span>
+      <div class="footer-bottom-right">
+        <span class="status-pill" style="background: transparent;">
+          <span class="dot"></span>
+          operational
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════════════ HOW-IT-WORKS MODAL ════════════════════════ -->
+<div class="modal-backdrop" id="howModal" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+  <div class="modal" role="document">
+    <div class="modal-head">
+      <h3 id="howTitle">How InvoicePass works</h3>
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-step">
+        <div class="modal-step-num">1</div>
+        <div>
+          <div class="modal-step-title">Pick your inbox name</div>
+          <div class="modal-step-desc">Choose a short handle. It becomes your unique address — for example <span class="mono">silva@invoicepass.app</span>.</div>
+        </div>
+      </div>
+      <div class="modal-step">
+        <div class="modal-step-num">2</div>
+        <div>
+          <div class="modal-step-title">Send or forward invoices</div>
+          <div class="modal-step-desc">Vendors email PDFs to that address. Or forward existing emails — we parse the attachment, not the message.</div>
+        </div>
+      </div>
+      <div class="modal-step">
+        <div class="modal-step-num">3</div>
+        <div>
+          <div class="modal-step-title">They land in your portal</div>
+          <div class="modal-step-desc">Signed, deduped, delivered exactly once. Review in the portal or push to your stack via webhook.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">No setup. No SDK. Works with any vendor that can send a PDF.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════ TOAST ════════════════════════ -->
+<div class="toast" id="toast">
+  <span class="check">✓</span>
+  <span id="toastText">Copied to clipboard</span>
+</div>
+
+<script>
+/* ─────────────────────────────────────────
+   1. Live telemetry stream — fake but plausible
+   ───────────────────────────────────────── */
+const stream = document.getElementById('telStream');
+const handlePool = ['acme-co', 'northpoint', 'vertex-ops', 'hadron-labs',
+                    'lumiere', 'forge-mfg', 'orbital', 'breakwater',
+                    'ironside', 'meridian', 'flatline', 'helios-ag'];
+const methods = [
+  { txt: 'INGEST', cls: '' },
+  { txt: 'DEDUP',  cls: 'ok' },
+  { txt: 'SIGN',   cls: 'ok' },
+  { txt: 'NOTIFY', cls: 'ok' },
+  { txt: 'PARSE',  cls: '' },
+  { txt: 'CONFLICT', cls: 'warn' },
+];
+
+function pad(n) { return String(n).padStart(2,'0'); }
+function timeStr(d) { return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; }
+function rndHex(n) {
+  const c = 'abcdef0123456789';
+  let s = '';
+  for (let i = 0; i < n; i++) s += c[Math.floor(Math.random() * c.length)];
+  return s;
+}
+function rndAmount() {
+  const x = (Math.random() * 4000 + 80).toFixed(2);
+  return `$${x}`;
+}
+
+function makeLine() {
+  const d = new Date();
+  const m = methods[Math.floor(Math.random() * methods.length)];
+  const handle = handlePool[Math.floor(Math.random() * handlePool.length)];
+  const hash = rndHex(8);
+  const amt = rndAmount();
+
+  let msg;
+  if (m.txt === 'INGEST') msg = `<span class="hash">${handle}</span> · INV-<span class="num">${Math.floor(Math.random()*9000+1000)}</span> · ${amt}`;
+  else if (m.txt === 'DEDUP') msg = `<span class="hash">sha256:${hash}</span> · checked`;
+  else if (m.txt === 'SIGN')   msg = `<span class="hash">${handle}/inv_${hash}</span> · ed25519`;
+  else if (m.txt === 'NOTIFY') msg = `<span class="hash">${handle}</span> → POST /webhooks · <span class="num">200</span>`;
+  else if (m.txt === 'PARSE')  msg = `<span class="hash">XMP</span> · ${Math.floor(Math.random()*40+30)}ms`;
+  else                          msg = `<span class="hash">duplicate flagged · ${rndHex(6)}</span>`;
+
+  return `<div class="tel-line"><span class="tel-time">${timeStr(d)}</span><span class="tel-meth ${m.cls}">${m.txt}</span><span class="tel-msg">${msg}</span></div>`;
+}
+
+// initial seed
+for (let i = 0; i < 12; i++) stream.innerHTML += makeLine();
+
+setInterval(() => {
+  stream.insertAdjacentHTML('afterbegin', makeLine());
+  while (stream.children.length > 14) stream.removeChild(stream.lastChild);
+}, 900);
+
+/* ─────────────────────────────────────────
+   2. Live counters — drift naturally upward
+   ───────────────────────────────────────── */
+let today = 14827;
+let latency = 142;
+let dedup = 3.4;
+
+setInterval(() => {
+  today += Math.floor(Math.random() * 4) + 1;
+  document.getElementById('statToday').textContent = today.toLocaleString();
+}, 1100);
+
+setInterval(() => {
+  latency = Math.max(118, Math.min(168, latency + Math.floor(Math.random() * 11) - 5));
+  document.getElementById('statLatency').innerHTML = latency + '<span class="unit">ms</span>';
+
+  dedup = Math.max(2.8, Math.min(4.2, dedup + (Math.random() * 0.2 - 0.1)));
+  document.getElementById('statDedup').innerHTML = dedup.toFixed(1) + '<span class="unit">%</span>';
+}, 2400);
+
+/* ─────────────────────────────────────────
+   3. Uptime bars — render 90 days
+   ───────────────────────────────────────── */
+document.querySelectorAll('.uptime-bar').forEach(bar => {
+  const pattern = bar.dataset.pattern;
+  const total = 90;
+  let html = '';
+  for (let i = 0; i < total; i++) {
+    let cls = '';
+    if (pattern === 'one-blip' && i === 67) cls = 'partial';
+    html += `<div class="uptime-tick ${cls}"></div>`;
+  }
+  bar.innerHTML = html;
+});
+
+/* ─────────────────────────────────────────
+   4. Code tabs
+   ───────────────────────────────────────── */
+document.querySelectorAll('.code-tab[data-tab]').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.code-tab[data-tab]').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.code-pane').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelector(`.code-pane[data-pane="${target}"]`).classList.add('active');
+  });
+});
+
+/* ─────────────────────────────────────────
+   5. Copy snippet
+   ───────────────────────────────────────── */
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const active = document.querySelector('.code-pane.active pre');
+  navigator.clipboard.writeText(active.innerText).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'copied';
+    btn.classList.add('copied');
+    showToast('Copied to clipboard');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+  });
+});
+
+/* ─────────────────────────────────────────
+   6. Claim form (top + bottom)
+   ───────────────────────────────────────── */
+function sanitizeHandle(v) {
+  return v.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 32);
+}
+
+function handleClaim(input, isTop) {
+  const raw = input.value.trim();
+  const handle = sanitizeHandle(raw);
+  if (!handle || handle.length < 3) {
+    input.style.borderColor = 'var(--red)';
+    showToast('Handle must be 3+ characters, letters and numbers only');
+    return;
+  }
+
+  // store for portal pickup
+  try {
+    localStorage.setItem('ip_pending_handle', handle);
+    localStorage.setItem('ip_pending_at', new Date().toISOString());
+  } catch (e) {}
+
+  if (isTop) {
+    document.getElementById('handleResult').textContent = handle;
+    document.getElementById('handleEmail').textContent = handle;
+    document.getElementById('claimSuccess').classList.add('shown');
+    document.getElementById('claimForm').style.display = 'none';
+    document.querySelector('.claim-label-row').style.display = 'none';
+    document.querySelector('.claim-note').style.display = 'none';
+    showToast(`Inbox "${handle}@invoicepass.app" reserved`);
+  } else {
+    showToast(`Inbox "${handle}@invoicepass.app" reserved · check the top of the page for next steps`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      document.getElementById('handleInput').value = handle;
+      document.getElementById('handleInput').dispatchEvent(new Event('input'));
+      document.getElementById('claimForm').dispatchEvent(new Event('submit'));
+    }, 600);
+  }
+}
+
+document.getElementById('claimForm').addEventListener('submit', e => {
+  e.preventDefault();
+  handleClaim(document.getElementById('handleInput'), true);
+});
+
+document.getElementById('claimFormBottom').addEventListener('submit', e => {
+  e.preventDefault();
+  handleClaim(document.getElementById('handleInputBottom'), false);
+});
+
+document.getElementById('handleInput').addEventListener('input', e => {
+  e.target.style.borderColor = '';
+  e.target.value = sanitizeHandle(e.target.value);
+});
+
+document.getElementById('handleInputBottom').addEventListener('input', e => {
+  e.target.style.borderColor = '';
+  e.target.value = sanitizeHandle(e.target.value);
+});
+
+/* ─────────────────────────────────────────
+   7. Toast
+   ───────────────────────────────────────── */
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('visible'), 2600);
+}
+
+/* ─────────────────────────────────────────
+   8. Stub link handler (avoid 404 during demo)
+   ───────────────────────────────────────── */
+document.querySelectorAll('[data-stub]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    showToast('Section under construction');
+  });
+});
+
+/* ─────────────────────────────────────────
+   9. How-it-works modal
+   ───────────────────────────────────────── */
+const howModal = document.getElementById('howModal');
+
+function openModal() {
+  howModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  howModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('howLinkTop').addEventListener('click', openModal);
+document.getElementById('howLinkBottom').addEventListener('click', openModal);
+const howLinkOp = document.getElementById('howLinkOp');
+if (howLinkOp) howLinkOp.addEventListener('click', openModal);
+document.getElementById('modalClose').addEventListener('click', closeModal);
+
+howModal.addEventListener('click', e => {
+  if (e.target === howModal) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && howModal.classList.contains('open')) closeModal();
+});
+
+/* ─────────────────────────────────────────
+  10. Persona system — modal + body class + switcher
+   ───────────────────────────────────────── */
+const personaModal = document.getElementById('personaModal');
+const personaSwitch = document.getElementById('personaSwitch');
+const personaLabel = document.getElementById('personaLabel');
+
+function applyPersona(p) {
+  document.body.classList.remove('persona-dev', 'persona-op');
+  document.body.classList.add(`persona-${p}`);
+  personaLabel.textContent = p === 'dev' ? 'developer view' : 'operator view';
+  try { localStorage.setItem('ip_persona', p); } catch (e) {}
+}
+
+function showPersonaModal() {
+  personaModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function hidePersonaModal() {
+  personaModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.querySelectorAll('.persona-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = btn.dataset.persona;
+    applyPersona(p);
+    hidePersonaModal();
+  });
+});
+
+personaSwitch.addEventListener('click', () => {
+  const cur = document.body.classList.contains('persona-dev') ? 'dev' : 'op';
+  applyPersona(cur === 'dev' ? 'op' : 'dev');
+  showToast(`Switched to ${cur === 'dev' ? 'operator' : 'developer'} view`);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// initial load
+(function initPersona() {
+  let saved = null;
+  try { saved = localStorage.getItem('ip_persona'); } catch (e) {}
+  if (saved === 'dev' || saved === 'op') {
+    applyPersona(saved);
+  } else {
+    // first visit — default to dev so layout doesn't flash, then show modal
+    applyPersona('dev');
+    setTimeout(showPersonaModal, 350);
+  }
+})();
+
+/* ─────────────────────────────────────────
+  11. Operator inbox mock — animated invoices arriving
+   ───────────────────────────────────────── */
+const inboxList = document.getElementById('inboxList');
+const inboxCount = document.getElementById('inboxCount');
+
+const vendors = [
+  { n: 'Stronghold Lumber Co.',     id: 'INV-2487' },
+  { n: 'Northland Concrete Supply', id: 'INV-9921' },
+  { n: 'Westwood Electric',          id: 'INV-1140' },
+  { n: 'Verticé Plumbing Ltd.',     id: 'INV-0556' },
+  { n: 'Granite Hardware',           id: 'INV-3308' },
+  { n: 'BlueRidge Roofing',          id: 'INV-7714' },
+  { n: 'PaintCraft Studio',          id: 'INV-2031' },
+  { n: 'Marshall Tools & Rental',    id: 'INV-8842' },
+  { n: 'Hudson Drywall Co.',         id: 'INV-4490' },
+  { n: 'Cornerstone Glass',          id: 'INV-1665' },
+  { n: 'Ironbridge Steel',           id: 'INV-9007' },
+  { n: 'Sundeck Outdoor Co.',        id: 'INV-5523' },
+];
+
+let inboxCountVal = 12;
+
+function rndAmount2() {
+  const v = Math.random();
+  let x;
+  if (v < 0.7) x = (Math.random() * 950 + 80).toFixed(2);
+  else if (v < 0.95) x = (Math.random() * 4000 + 950).toFixed(2);
+  else x = (Math.random() * 9000 + 4000).toFixed(2);
+  return Number(x).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function makeInboxItem(isNew) {
+  const v = vendors[Math.floor(Math.random() * vendors.length)];
+  const amt = rndAmount2();
+  const dup = Math.random() < 0.08;
+  const status = dup
+    ? '<span class="inbox-status dup"><span class="dot"></span>duplicate</span>'
+    : '<span class="inbox-status signed"><span class="dot"></span>signed</span>';
+
+  const div = document.createElement('div');
+  div.className = 'inbox-item' + (isNew ? ' new' : '');
+  div.innerHTML = `
+    <div class="inbox-pdf-icon">PDF</div>
+    <div class="inbox-meta">
+      <span class="inbox-vendor">${v.n}</span>
+      <span class="inbox-num">${v.id}</span>
+    </div>
+    <span class="inbox-amount">$${amt}</span>
+    ${status}
+  `;
+  return div;
+}
+
+if (inboxList) {
+  // seed initial 6
+  for (let i = 0; i < 6; i++) inboxList.appendChild(makeInboxItem(false));
+
+  // periodically add new ones at top
+  setInterval(() => {
+    if (!document.body.classList.contains('persona-op')) return;
+    inboxList.insertBefore(makeInboxItem(true), inboxList.firstChild);
+    inboxCountVal++;
+    inboxCount.textContent = `${inboxCountVal} invoices`;
+    while (inboxList.children.length > 8) inboxList.removeChild(inboxList.lastChild);
+  }, 3800);
+}
+
+/* ─────────────────────────────────────────
+  12. Operator claim form — same logic
+   ───────────────────────────────────────── */
+const claimFormOp = document.getElementById('claimFormOp');
+if (claimFormOp) {
+  const inputOp = document.getElementById('handleInputOp');
+  inputOp.addEventListener('input', e => {
+    e.target.style.borderColor = '';
+    e.target.value = sanitizeHandle(e.target.value);
+  });
+
+  claimFormOp.addEventListener('submit', e => {
+    e.preventDefault();
+    const raw = inputOp.value.trim();
+    const handle = sanitizeHandle(raw);
+    if (!handle || handle.length < 3) {
+      inputOp.style.borderColor = 'var(--red)';
+      showToast('Handle must be 3+ characters, letters and numbers only');
+      return;
+    }
+    try {
+      localStorage.setItem('ip_pending_handle', handle);
+      localStorage.setItem('ip_pending_at', new Date().toISOString());
+    } catch (e) {}
+    document.getElementById('handleResultOp').textContent = handle;
+    document.getElementById('handleEmailOp').textContent = handle;
+    document.getElementById('claimSuccessOp').classList.add('shown');
+    claimFormOp.style.display = 'none';
+    claimFormOp.parentElement.querySelector('.claim-label-row').style.display = 'none';
+    claimFormOp.parentElement.parentElement.querySelector('.claim-note').style.display = 'none';
+    showToast(`Inbox "${handle}@invoicepass.app" reserved`);
+  });
+}
+</script>
+
+</body>
+</html>

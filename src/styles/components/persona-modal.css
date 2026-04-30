@@ -1,0 +1,196 @@
+.persona-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 25, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.persona-modal.open { opacity: 1; pointer-events: auto; }
+
+.persona-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 56px 48px 48px;
+  width: 100%;
+  max-width: 720px;
+  box-shadow: 0 24px 80px rgba(15, 20, 25, 0.18), 0 4px 12px rgba(15, 20, 25, 0.08);
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.persona-modal.open .persona-card {
+  transform: translateY(0) scale(1);
+}
+
+/* faint grid background inside card */
+.persona-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(15, 20, 25, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 20, 25, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+.persona-card > * { position: relative; }
+
+.persona-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--ink);
+  margin-bottom: 36px;
+}
+
+.persona-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
+
+.persona-eyebrow .blue-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--blue);
+  margin-right: 8px;
+  vertical-align: middle;
+  transform: translateY(-1px);
+}
+
+.persona-card h2 {
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 500;
+  letter-spacing: -0.018em;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.persona-card h2::after { display: none; }
+
+.persona-card h2 .accent { font-style: italic; font-weight: 400; color: var(--ink-3); }
+.persona-card h2 .primary-blue { color: var(--blue); }
+
+.persona-sub {
+  font-size: 15px;
+  color: var(--ink-3);
+  margin-bottom: 36px;
+  max-width: 560px;
+  line-height: 1.55;
+}
+
+.persona-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 600px) {
+  .persona-options { grid-template-columns: 1fr; }
+  .persona-card { padding: 36px 24px 28px; }
+}
+
+.persona-option {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 22px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+
+.persona-option:hover {
+  border-color: var(--ink-3);
+  background: var(--surface);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 20, 25, 0.06);
+}
+
+.persona-option-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--blue-faint);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.persona-option:nth-child(2) .persona-option-icon {
+  background: var(--amber-soft);
+  color: #B07A1F;
+}
+
+.persona-option-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+
+.persona-option-sub {
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.persona-option-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-4);
+  transition: color 0.2s;
+}
+
+.persona-option:hover .persona-option-arrow { color: var(--ink-2); }
+
+.persona-option-arrow svg {
+  transition: transform 0.2s;
+}
+
+.persona-option:hover .persona-option-arrow svg {
+  transform: translateX(3px);
+}
+
+.persona-foot {
+  margin-top: 28px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-4);
+  letter-spacing: 0.04em;
+  text-align: center;
+}

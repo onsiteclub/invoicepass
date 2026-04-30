@@ -1,0 +1,27 @@
+---
+interface Props {
+  cardId: string;
+  handleId: string;
+  emailId: string;
+}
+
+const { cardId, handleId, emailId } = Astro.props;
+---
+
+<div class="claim-success" id={cardId}>
+  <div class="claim-success-head">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    <span>Inbox reserved</span>
+  </div>
+  <div class="claim-handle-row">
+    <span><span class="label">your address</span><span class="handle" id={handleId}>silva</span><span style="color: var(--ink-4)">@invoicepass.app</span></span>
+    <span style="color: var(--green); font-family: var(--font-mono); font-size: 11px;">● live</span>
+  </div>
+  <p class="claim-success-info">
+    Send or forward invoices to <span class="mono" style="color: var(--ink-2);"><span id={emailId}>silva</span>@invoicepass.app</span> and they'll land in your portal — signed, deduped, delivered. Access details have been queued for delivery.
+  </p>
+  <a href="https://portal.invoicepass.app" class="open-portal">
+    Open portal
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</div>

@@ -1,0 +1,34 @@
+---
+import ClaimForm from './ClaimForm.astro';
+import ClaimSuccessCard from './ClaimSuccessCard.astro';
+import InboxMock from './InboxMock.astro';
+---
+
+<section class="hero op-only">
+  <div class="container">
+    <div class="hero-grid">
+
+      <div>
+        <div class="hero-eyebrow eyebrow"><span class="blue-dot"></span>For operators</div>
+
+        <h1><span class="primary-blue">Every invoice you get.</span> <span class="accent">In one signed inbox</span></h1>
+
+        <p class="hero-sub">
+          Forward invoices from anywhere — Gmail, Outlook, vendor portals. They're parsed, deduped, and organized in your portal. Without spreadsheets. Without lost attachments. Exactly once.
+        </p>
+
+        <ClaimForm formId="claimFormOp" inputId="handleInputOp" howLinkId="howLinkOp" />
+
+        <div class="claim-note">
+          <span class="check">✓</span>
+          Free up to 10 users · No credit card · One inbox per operator
+        </div>
+
+        <ClaimSuccessCard cardId="claimSuccessOp" handleId="handleResultOp" emailId="handleEmailOp" />
+      </div>
+
+      <InboxMock />
+
+    </div>
+  </div>
+</section>

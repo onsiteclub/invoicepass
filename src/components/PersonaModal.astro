@@ -1,0 +1,54 @@
+---
+import Logo from './Logo.astro';
+---
+
+<div class="persona-modal" id="personaModal" role="dialog" aria-modal="true" aria-labelledby="personaTitle">
+  <div class="persona-card">
+    <div class="persona-brand">
+      <Logo variant="compact" />
+      InvoicePass
+    </div>
+
+    <div class="persona-eyebrow"><span class="blue-dot"></span>Welcome</div>
+    <h2 id="personaTitle"><span class="primary-blue">Built for two kinds of people.</span> <span class="accent">Pick yours.</span></h2>
+    <p class="persona-sub">The same protocol underneath — different surfaces above. You can switch later.</p>
+
+    <div class="persona-options">
+      <button class="persona-option" data-persona="dev">
+        <div class="persona-option-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </div>
+        <div>
+          <div class="persona-option-title">I'm a developer</div>
+          <p class="persona-option-sub">Connect via API. Receive signed invoices, ingest at scale, build on top of the protocol.</p>
+        </div>
+        <div class="persona-option-arrow">
+          <span>SMTP · API · Webhooks</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </button>
+
+      <button class="persona-option" data-persona="op">
+        <div class="persona-option-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="persona-option-title">I'm an operator</div>
+          <p class="persona-option-sub">Run a business. Get every invoice in one inbox — signed, deduped, organized. No code needed.</p>
+        </div>
+        <div class="persona-option-arrow">
+          <span>Inbox · Portal · Exports</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </button>
+    </div>
+
+    <p class="persona-foot">You can switch view anytime from the top bar</p>
+  </div>
+</div>

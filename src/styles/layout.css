@@ -1,0 +1,38 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+@media (max-width: 720px) {
+  .container { padding: 0 20px; }
+}
+
+section.spaced { padding: 120px 0; }
+
+@media (max-width: 720px) {
+  section.spaced { padding: 72px 0; }
+}
+
+.section-head {
+  max-width: 680px;
+  margin-bottom: 64px;
+}
+
+.section-head .eyebrow { display: block; margin-bottom: 16px; }
+
+.section-head h2 {
+  margin-bottom: 18px;
+}
+
+.section-head h2 .accent {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.section-head p {
+  font-size: 17px;
+  color: var(--ink-3);
+  line-height: 1.55;
+}
