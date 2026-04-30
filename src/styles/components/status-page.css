@@ -34,18 +34,33 @@
 
 .status-row {
   display: grid;
-  grid-template-columns: 200px 1fr 110px 80px;
+  grid-template-columns: minmax(160px, 200px) 1fr 110px 80px;
   align-items: center;
   padding: 18px 24px;
   border-bottom: 1px solid var(--border-soft);
   gap: 24px;
+  min-width: 0;
 }
 
 .status-row:last-child { border-bottom: 0; }
 
-@media (max-width: 720px) {
-  .status-row { grid-template-columns: 1fr 60px; }
-  .status-row .uptime-bar, .status-row .latency { display: none; }
+/* tablet — collapse uptime bar + latency, keep service name + state */
+@media (max-width: 880px) {
+  .status-row {
+    grid-template-columns: 1fr auto;
+    padding: 16px 20px;
+    gap: 16px;
+  }
+  .status-row .uptime-bar,
+  .status-row .latency { display: none; }
+  .status-card-head { padding: 18px 20px; flex-wrap: wrap; gap: 8px; }
+}
+
+/* small phone — tighter padding, allow service desc to wrap */
+@media (max-width: 420px) {
+  .status-row { padding: 14px 16px; }
+  .status-card-head { padding: 14px 16px; }
+  .status-card-head h3 { font-size: 15px; }
 }
 
 .status-svc {

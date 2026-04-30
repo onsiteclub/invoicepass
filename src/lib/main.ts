@@ -6,6 +6,7 @@ import { initClaimForms } from './claim';
 import { initStubLinks } from './stub-links';
 import { initHowModal } from './how-modal';
 import { initDevSignup } from './dev-signup';
+import { initWelcome } from './welcome';
 
 function init(): void {
   initTelemetry();
@@ -16,6 +17,7 @@ function init(): void {
   initStubLinks();
   initHowModal();
   initDevSignup();
+  initWelcome();
 }
 
 if (document.readyState === 'loading') {

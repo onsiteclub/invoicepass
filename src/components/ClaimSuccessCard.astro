@@ -15,13 +15,27 @@ const { cardId, handleId, emailId } = Astro.props;
   </div>
   <div class="claim-handle-row">
     <span><span class="label">your address</span><span class="handle" id={handleId}>silva</span><span style="color: var(--ink-4)">@invoicepass.app</span></span>
-    <span style="color: var(--green); font-family: var(--font-mono); font-size: 11px;">● live</span>
+    <span class="claim-timer" aria-live="polite">
+      <span class="claim-timer-dot"></span>
+      <span data-claim-timer>15:00</span>
+    </span>
   </div>
-  <p class="claim-success-info">
-    Send or forward invoices to <span class="mono" style="color: var(--ink-2);"><span id={emailId}>silva</span>@invoicepass.app</span> and they'll land in your portal — signed, deduped, delivered. Access details have been queued for delivery.
-  </p>
-  <a href="https://portal.invoicepass.app" class="open-portal">
-    Open portal
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-  </a>
+
+  <div data-claim-active>
+    <p class="claim-success-info">
+      Held for you for <strong>15 minutes</strong> — finish signup at the portal to lock this address. Once it's yours, forward invoices to <span class="mono" style="color: var(--ink-2);"><span id={emailId}>silva</span>@invoicepass.app</span> and they'll land in your portal, signed and deduped.
+    </p>
+    <a href="https://portal.invoicepass.app" class="open-portal" data-claim-portal>
+      Continue to signup
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+
+  <div class="claim-expired" data-claim-expired hidden>
+    <p class="claim-expired-msg">Reservation expired — names release after 15 minutes if signup isn't started.</p>
+    <button type="button" class="claim-expired-retry" data-claim-retry>
+      Pick another name
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+    </button>
+  </div>
 </div>

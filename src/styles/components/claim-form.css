@@ -46,10 +46,16 @@
   transition: color 0.15s;
 }
 
-.how-link:hover { color: var(--blue); }
+@media (hover: hover) {
+  .how-link:hover { color: var(--blue); }
+  .how-link-dark:hover { color: var(--surface); }
+}
+@media (hover: none) {
+  .how-link:active { color: var(--blue); }
+  .how-link-dark:active { color: var(--surface); }
+}
 
 .how-link-dark { color: var(--ink-5); }
-.how-link-dark:hover { color: var(--surface); }
 
 .claim-label-row-dark .claim-label { color: var(--ink-5); }
 
@@ -97,11 +103,17 @@
   background: transparent;
   outline: none;
   font-family: var(--font-mono);
-  font-size: 14px;
+  /* 16px floor prevents iOS auto-zoom on focus; downsize visually with clamp */
+  font-size: clamp(14px, 1.4vw, 16px);
   color: var(--ink);
-  padding: 11px 0;
+  padding: 12px 0;
   letter-spacing: -0.005em;
   min-width: 0;
+}
+
+/* iOS Safari: lock to ≥16px to fully suppress focus auto-zoom (clamp alone can be < 16 on small viewports) */
+@supports (-webkit-touch-callout: none) {
+  .claim input { font-size: 16px; }
 }
 
 .claim input::placeholder { color: var(--ink-5); }
@@ -121,7 +133,12 @@
   flex-shrink: 0;
 }
 
-.claim-btn:hover { background: var(--ink-2); }
+@media (hover: hover) {
+  .claim-btn:hover { background: var(--ink-2); }
+}
+@media (hover: none) {
+  .claim-btn:active { background: var(--ink-2); transform: scale(0.985); }
+}
 
 .claim-feedback {
   display: block;
@@ -225,3 +242,61 @@
 }
 
 .open-portal:hover { background: var(--ink-2); }
+
+.claim-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.claim-timer-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+  animation: claim-timer-pulse 1.6s ease-out infinite;
+}
+
+@keyframes claim-timer-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
+  70%  { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.claim-expired {
+  border-top: 1px dashed var(--border);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+.claim-expired-msg {
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+.claim-expired-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.claim-expired-retry:hover {
+  background: var(--surface);
+  border-color: var(--ink-4);
+}

@@ -8,10 +8,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: clamp(12px, 3vw, 24px);
+  /* iOS notch / home indicator awareness */
+  padding-top: max(clamp(12px, 3vw, 24px), env(safe-area-inset-top));
+  padding-bottom: max(clamp(12px, 3vw, 24px), env(safe-area-inset-bottom));
+  padding-left: max(clamp(12px, 3vw, 24px), env(safe-area-inset-left));
+  padding-right: max(clamp(12px, 3vw, 24px), env(safe-area-inset-right));
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease;
+  overscroll-behavior: contain;
 }
 
 .dev-modal-backdrop[hidden] { display: none; }
@@ -22,8 +28,12 @@
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 480px;
+  /* dvh — survives mobile browser chrome show/hide; vh fallback for older browsers */
   max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
   overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 24px 80px rgba(15, 20, 25, 0.2), 0 4px 12px rgba(15, 20, 25, 0.08);
   transform: translateY(12px) scale(0.98);
   transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
@@ -62,19 +72,25 @@
   transition: all 0.15s;
 }
 
-.dev-modal-close:hover { color: var(--ink); background: var(--surface-2); }
+@media (hover: hover) {
+  .dev-modal-close:hover { color: var(--ink); background: var(--surface-2); }
+}
+@media (hover: none) {
+  .dev-modal-close:active { color: var(--ink); background: var(--surface-2); }
+}
 
 .dev-modal-body { padding: 22px 26px 24px; }
 
 .dev-modal-eyebrow { display: block; margin-bottom: 12px; }
 
 .dev-modal-title {
-  font-size: 22px;
+  font-size: clamp(20px, 3vw, 22px);
   font-weight: 500;
   letter-spacing: -0.012em;
   line-height: 1.18;
   color: var(--ink);
   margin-bottom: 8px;
+  text-wrap: balance;
 }
 .dev-modal-title::after { display: none; }
 
@@ -106,12 +122,19 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
-  padding: 10px 12px;
+  padding: 11px 12px;
   font-family: var(--font-sans);
-  font-size: 14px;
+  /* fluid 14→16 — 16 is the iOS auto-zoom threshold */
+  font-size: clamp(14px, 1.5vw, 16px);
   color: var(--ink);
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+/* iOS Safari: lock to ≥16px to fully suppress focus auto-zoom */
+@supports (-webkit-touch-callout: none) {
+  .dev-field input,
+  .dev-field textarea { font-size: 16px; }
 }
 
 .dev-field textarea {
@@ -166,7 +189,12 @@
   margin-top: 4px;
 }
 
-.dev-modal-submit:hover:not(:disabled) { background: var(--ink-2); }
+@media (hover: hover) {
+  .dev-modal-submit:hover:not(:disabled) { background: var(--ink-2); }
+}
+@media (hover: none) {
+  .dev-modal-submit:not(:disabled):active { background: var(--ink-2); transform: scale(0.99); }
+}
 
 .dev-modal-submit:disabled {
   opacity: 0.4;

@@ -1,0 +1,42 @@
+---
+import Logo from './Logo.astro';
+---
+
+<div class="welcome-backdrop" id="welcomeModal" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" hidden>
+  <div class="welcome-card" role="document">
+    <header class="welcome-head">
+      <div class="welcome-brand">
+        <Logo variant="nav" width={62} height={49} />
+        <span class="logo-text">Invoice<span class="logo-flow">Pass</span></span>
+      </div>
+    </header>
+
+    <div class="welcome-body">
+      <div class="welcome-eyebrow eyebrow"><span class="blue-dot"></span>Welcome</div>
+      <h2 class="welcome-title" id="welcomeTitle"><span class="primary-blue">Two ways in.</span> <span class="accent">Pick yours</span></h2>
+      <p class="welcome-sub">Same protocol underneath — different surface above.</p>
+
+      <div class="welcome-options">
+        <button class="welcome-option" type="button" data-welcome-pick="dev">
+          <div class="welcome-option-icon" aria-hidden="true">&lt;/&gt;</div>
+          <div class="welcome-option-title">I'm a developer</div>
+          <div class="welcome-option-foot">
+            <span>API · SDK</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </button>
+
+        <button class="welcome-option" type="button" data-welcome-pick="op">
+          <div class="welcome-option-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div class="welcome-option-title">I want to organize my invoices</div>
+          <div class="welcome-option-foot">
+            <span>Inbox</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

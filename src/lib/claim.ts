@@ -1,4 +1,5 @@
 import { showToast } from './toast';
+import { createReservation, startCountdown } from './reservation';
 
 // Demo-time reserved handles. Real availability check happens server-side
 // when the protocol/portal is wired up; this list keeps the landing
@@ -22,13 +23,6 @@ function getState(handle: string): State {
   if (handle.length < 3) return 'short';
   if (TAKEN.has(handle)) return 'taken';
   return 'available';
-}
-
-function persist(handle: string): void {
-  try {
-    localStorage.setItem('ip_pending_handle', handle);
-    localStorage.setItem('ip_pending_at', new Date().toISOString());
-  } catch (e) {}
 }
 
 function attachLiveValidation(form: HTMLFormElement, input: HTMLInputElement): void {
@@ -88,27 +82,40 @@ function setupForm(opts: {
       showToast(rejectMessage(state, handle));
       return;
     }
-    persist(handle);
     opts.onSuccess(handle);
   });
 
   return { form, input };
 }
 
-function hideClaimWrap(form: HTMLElement | null): void {
+function getClaimWrap(form: HTMLElement | null): HTMLElement | null {
   const wrap = form?.closest('.claim-card, .claim-wrap');
-  if (wrap) (wrap as HTMLElement).style.display = 'none';
+  return wrap as HTMLElement | null;
 }
 
-function showSuccessOp(handle: string): void {
+function showSuccessOp(handle: string, formInput: HTMLInputElement | null): void {
   const result = document.getElementById('handleResultOp');
   const email = document.getElementById('handleEmailOp');
   const success = document.getElementById('claimSuccessOp');
   const form = document.getElementById('claimFormOp');
+  const wrap = getClaimWrap(form);
+
   if (result) result.textContent = handle;
   if (email) email.textContent = handle;
   if (success) success.classList.add('shown');
-  hideClaimWrap(form);
+  if (wrap) wrap.style.display = 'none';
+
+  if (!success) return;
+  const reservation = createReservation(handle);
+  startCountdown(reservation, success, () => {
+    success.classList.remove('shown');
+    if (wrap) wrap.style.display = '';
+    if (formInput) {
+      formInput.value = '';
+      formInput.dispatchEvent(new Event('input'));
+      formInput.focus();
+    }
+  });
 }
 
 export function initClaimForms(): void {
@@ -116,8 +123,8 @@ export function initClaimForms(): void {
     formId: 'claimFormOp',
     inputId: 'handleInputOp',
     onSuccess(handle) {
-      showSuccessOp(handle);
-      showToast(`Inbox "${handle}@invoicepass.app" reserved`);
+      showSuccessOp(handle, opForm?.input ?? null);
+      showToast(`Inbox "${handle}@invoicepass.app" reserved · 15 min to finish signup`);
     },
   });
 

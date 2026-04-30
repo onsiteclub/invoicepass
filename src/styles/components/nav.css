@@ -6,6 +6,9 @@ nav {
   backdrop-filter: saturate(1.6) blur(12px);
   -webkit-backdrop-filter: saturate(1.6) blur(12px);
   border-bottom: 1px solid var(--border-soft);
+  /* respect iOS landscape notch — don't tuck under it */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 .nav-row {
@@ -48,7 +51,12 @@ nav {
   transition: color 0.15s ease;
 }
 
-.nav-links a:hover { color: var(--ink); }
+@media (hover: hover) {
+  .nav-links a:hover { color: var(--ink); }
+}
+@media (hover: none) {
+  .nav-links a:active { color: var(--ink); }
+}
 
 .nav-right {
   display: flex;
@@ -104,7 +112,17 @@ nav {
   transition: color 0.15s, border-color 0.15s;
 }
 
-.nav-cross:hover { color: var(--ink); border-color: var(--border-strong); }
-
 .nav-cross svg { color: var(--ink-4); transition: transform 0.15s; }
-.nav-cross:hover svg { transform: translateX(2px); color: var(--ink-3); }
+
+@media (hover: hover) {
+  .nav-cross:hover { color: var(--ink); border-color: var(--border-strong); }
+  .nav-cross:hover svg { transform: translateX(2px); color: var(--ink-3); }
+}
+@media (hover: none) {
+  .nav-cross:active {
+    color: var(--ink);
+    border-color: var(--border-strong);
+    background: var(--surface-2);
+  }
+  .nav-cross:active svg { color: var(--ink-3); }
+}
