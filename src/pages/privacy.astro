@@ -1,0 +1,152 @@
+---
+import Legal from '../layouts/Legal.astro';
+---
+
+<Legal
+  title="Privacy — InvoicePass"
+  description="How InvoicePass collects, processes, and retains data on behalf of operators and developers."
+  eyebrow="Legal · Privacy"
+  heading={`Privacy <span class="accent">policy</span>`}
+  subhead="A plain-English summary of what we collect, why, where it lives, and how long we keep it. Written for operators, not lawyers."
+  effectiveDate="April 1, 2026"
+>
+  <h2>1. The short version</h2>
+  <p>
+    InvoicePass is invoice infrastructure. We process the inbound mail and payloads
+    you send us so we can dedupe, sign, and forward them to your destination of
+    record. We do not sell your data. We do not train models on customer payloads.
+    We retain raw inbound material for <strong>90 days</strong> by default and forwarded
+    receipts for <strong>7 years</strong> to support audits.
+  </p>
+
+  <h2>2. What we collect</h2>
+  <p>We collect three categories of data:</p>
+  <ul>
+    <li>
+      <strong>Account data</strong> — email, organization name, billing identifiers,
+      authentication state, and operator role (owner, foreman, dispatcher).
+    </li>
+    <li>
+      <strong>Invoice payloads</strong> — the raw email, attached PDFs, parsed line
+      items, and any signed receipt we generate. These are the materials your
+      account exists to ingest.
+    </li>
+    <li>
+      <strong>Operational telemetry</strong> — request IPs, user agents, API request
+      timestamps, and dedup hashes. Used for abuse prevention and to populate the
+      Status page.
+    </li>
+  </ul>
+
+  <h2>3. What we do not collect</h2>
+  <ul>
+    <li>We do not run third-party advertising trackers on any InvoicePass surface.</li>
+    <li>We do not collect device sensor data, clipboard contents, or location.</li>
+    <li>We do not read or index the body of attachments beyond what is needed to extract
+      invoice metadata (vendor, amount, line items, due date).</li>
+  </ul>
+
+  <h2>4. Where data lives</h2>
+  <p>
+    Production data is stored in <code>ca-central-1</code> (Montréal). Encrypted backups
+    replicate to <code>us-east-1</code> (N. Virginia) for disaster recovery only. Data
+    never leaves these two regions without an explicit DPA addendum.
+  </p>
+
+  <h2>5. Sub-processors</h2>
+  <p>The following vendors process customer data on our behalf:</p>
+  <table class="legal-table">
+    <thead>
+      <tr>
+        <th>Vendor</th>
+        <th>Purpose</th>
+        <th>Region</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Amazon Web Services</td>
+        <td>Compute, storage, network</td>
+        <td class="mono">ca-central-1</td>
+      </tr>
+      <tr>
+        <td>Postmark</td>
+        <td>Outbound transactional email</td>
+        <td class="mono">us-east-1</td>
+      </tr>
+      <tr>
+        <td>Stripe</td>
+        <td>Subscription billing</td>
+        <td class="mono">global</td>
+      </tr>
+      <tr>
+        <td>Sentry</td>
+        <td>Error and performance telemetry</td>
+        <td class="mono">us-west-2</td>
+      </tr>
+      <tr>
+        <td>Plausible</td>
+        <td>Cookieless web analytics</td>
+        <td class="mono">eu-central-1</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    We notify customers at least <strong>30 days</strong> before adding a new sub-processor.
+    The current list is the source of truth and is mirrored at <a href="/dpa">our DPA</a>.
+  </p>
+
+  <h2>6. How long we keep things</h2>
+  <table class="legal-table">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Retention</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Raw inbound email + attachments</td>
+        <td>90 days, then purged</td>
+      </tr>
+      <tr>
+        <td>Signed receipts (forwarded payloads)</td>
+        <td>7 years, then purged</td>
+      </tr>
+      <tr>
+        <td>Operational logs</td>
+        <td>30 days</td>
+      </tr>
+      <tr>
+        <td>Cancelled accounts</td>
+        <td>Hard-deleted after 60 days</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>7. Your rights</h2>
+  <p>
+    You can request a copy, correction, or deletion of personal data tied to your
+    account at any time. The same goes for the right to portability and to object to
+    specific processing. We honor requests within <strong>14 days</strong>. See
+    <a href="/data-export">Data export</a> for the self-serve flow.
+  </p>
+
+  <h2>8. Children</h2>
+  <p>
+    InvoicePass is a B2B service. We do not knowingly collect data from anyone under 16.
+    If we learn we have, we will delete it.
+  </p>
+
+  <h2>9. Changes to this policy</h2>
+  <p>
+    Material changes get a 30-day heads-up via email and an in-product banner. The
+    effective date at the top of this page reflects the latest revision.
+  </p>
+
+  <h2>10. Contact</h2>
+  <p>
+    Privacy questions, data subject requests, or law enforcement requests:
+    <a href="mailto:privacy@invoicepass.app">privacy@invoicepass.app</a>.
+  </p>
+</Legal>

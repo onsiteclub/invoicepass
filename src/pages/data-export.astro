@@ -1,0 +1,153 @@
+---
+import Legal from '../layouts/Legal.astro';
+---
+
+<Legal
+  title="Data export — InvoicePass"
+  description="Export everything in your InvoicePass account as a portable, signed archive."
+  eyebrow="Legal · Data export"
+  heading={`Take everything <span class="accent">with you</span>`}
+  subhead="One ZIP. Every payload, every signed receipt, every audit log line. Self-serve from the dashboard, or request it here."
+  effectiveDate="April 1, 2026"
+>
+  <h2>1. What's in the bundle</h2>
+  <p>
+    The export is a single <code>.zip</code>, organized for a human reading it cold —
+    not just for machines. Pull it open and you'll find:
+  </p>
+  <div class="legal-cards">
+    <div class="legal-card">
+      <div class="legal-card-head">
+        <span class="legal-card-tag">/raw</span>
+        <h3>Original payloads</h3>
+      </div>
+      <p>Every inbound email exactly as we received it (<code>.eml</code>) plus every attachment in its native format.</p>
+    </div>
+    <div class="legal-card">
+      <div class="legal-card-head">
+        <span class="legal-card-tag">/parsed</span>
+        <h3>Structured JSON</h3>
+      </div>
+      <p>One <code>.json</code> per invoice with vendor, line items, totals, references, and the hash chain that links it to its source email.</p>
+    </div>
+    <div class="legal-card">
+      <div class="legal-card-head">
+        <span class="legal-card-tag">/receipts</span>
+        <h3>Signed receipts</h3>
+      </div>
+      <p>The forwarded payload as your destination of record received it, with the Ed25519 signature and public key alongside.</p>
+    </div>
+    <div class="legal-card">
+      <div class="legal-card-head">
+        <span class="legal-card-tag">/csv</span>
+        <h3>Flat CSV</h3>
+      </div>
+      <p>For the bookkeeper. <code>invoices.csv</code> and <code>line_items.csv</code> with stable column names. UTF-8, RFC 4180.</p>
+    </div>
+    <div class="legal-card">
+      <div class="legal-card-head">
+        <span class="legal-card-tag">/audit</span>
+        <h3>Audit log</h3>
+      </div>
+      <p>Every login, every API call, every operator action — append-only NDJSON. Same format the SOC 2 auditor sees.</p>
+    </div>
+    <div class="legal-card">
+      <div class="legal-card-head">
+        <span class="legal-card-tag">/keys</span>
+        <h3>Verification material</h3>
+      </div>
+      <p>The public keys we used to sign your receipts, plus a <code>verify.sh</code> that checks every signature without InvoicePass involvement.</p>
+    </div>
+  </div>
+
+  <h2>2. The shape on disk</h2>
+  <pre><code class="legal-tree">invoicepass-export-2026-04-30.zip
+├── manifest.json          ← every file with sha256, byte count, source ref
+├── raw/
+│   ├── 2026-04-29/
+│   │   ├── 0001-acme-supplies.eml
+│   │   └── 0001-acme-supplies/invoice.pdf
+│   └── ...
+├── parsed/
+│   └── 2026-04-29/0001-acme-supplies.json
+├── receipts/
+│   └── 2026-04-29/0001-acme-supplies.signed.json
+├── csv/
+│   ├── invoices.csv
+│   └── line_items.csv
+├── audit/
+│   └── 2026-04.ndjson
+└── keys/
+    ├── ed25519-2026-q2.pub
+    └── verify.sh</code></pre>
+  <p>
+    Sizes: a typical month for a 12-truck operator clocks in around 180&nbsp;MB. Heavy
+    accounts can break a gigabyte; the archive splits at 4&nbsp;GB into numbered parts.
+  </p>
+
+  <h2>3. How to trigger one</h2>
+  <ol>
+    <li>Open the dashboard at <a href="https://portal.invoicepass.app">portal.invoicepass.app</a>.</li>
+    <li>Go to <strong>Settings → Data → Export</strong>.</li>
+    <li>Pick a date range (default: everything) and click <strong>Generate</strong>.</li>
+    <li>We email you a one-time download link, valid for 72 hours, when the bundle is ready.
+      Most exports complete in under five minutes.</li>
+  </ol>
+
+  <div class="legal-cta">
+    <div class="legal-cta-text">
+      <strong>Don't have dashboard access yet?</strong>
+      <span>Tell us your account email and we'll generate the bundle on your behalf.</span>
+    </div>
+    <button type="button" data-open-contact>Request export</button>
+  </div>
+
+  <h2>4. Verifying signatures yourself</h2>
+  <p>
+    Every receipt in <code>/receipts</code> is a JSON file plus an Ed25519 signature in
+    its <code>signature</code> field. The <code>verify.sh</code> in <code>/keys</code> walks
+    the bundle and confirms every signature against the public key in the same folder.
+    No network call, no InvoicePass involvement — that is the point. If we disappeared
+    tomorrow, your receipts are still cryptographically yours.
+  </p>
+
+  <h2>5. Retention after export</h2>
+  <p>
+    Generating an export does not delete anything. Standard retention from our
+    <a href="/privacy">Privacy policy</a> still applies (raw inbound: 90 days; receipts:
+    7 years). To purge after exporting, visit
+    <strong>Settings → Data → Erase</strong>; confirmations require typing your account
+    name to prevent slips.
+  </p>
+
+  <h2>6. On account closure</h2>
+  <p>
+    If you cancel, you have <strong>30 days</strong> from the end of your last billing
+    period to download the export. After that, we hard-delete within 60 days unless
+    retention law requires us to hold longer. We confirm deletion in writing on request.
+  </p>
+
+  <h2>7. Questions</h2>
+  <p>
+    Stuck on a verification step or need a custom format (XBRL, UBL, NetSuite SuiteApp)?
+    <a href="mailto:support@invoicepass.app">support@invoicepass.app</a> — we read every
+    one and reply within one business day.
+  </p>
+</Legal>
+
+<style>
+  .legal-tree {
+    display: block;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--ink-2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 18px 0 22px;
+  }
+</style>

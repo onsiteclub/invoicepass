@@ -1,0 +1,57 @@
+---
+import Base from './Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import ContactModal from '../components/ContactModal.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  eyebrow: string;
+  heading: string;
+  subhead?: string;
+  effectiveDate?: string;
+  variant?: 'dev' | 'op';
+}
+
+const {
+  title,
+  description,
+  eyebrow,
+  heading,
+  subhead,
+  effectiveDate,
+  variant = 'dev',
+} = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <Nav variant={variant} />
+
+  <main class="legal-page">
+    <div class="container legal-container">
+      <header class="legal-head">
+        <div class="eyebrow"><span class="blue-dot"></span>{eyebrow}</div>
+        <h1 set:html={heading} />
+        {subhead && <p class="legal-sub">{subhead}</p>}
+        {effectiveDate && (
+          <p class="legal-meta mono">Effective {effectiveDate} · v1.4.2</p>
+        )}
+      </header>
+
+      <article class="legal-body">
+        <slot />
+      </article>
+
+      <footer class="legal-foot">
+        <p class="legal-disclaimer mono">
+          This document is a plain-language summary written for clarity. It is not legal
+          advice. For questions, write <a href="mailto:legal@invoicepass.app">legal@invoicepass.app</a>.
+        </p>
+      </footer>
+    </div>
+  </main>
+
+  <Footer variant={variant} />
+  <ContactModal />
+</Base>

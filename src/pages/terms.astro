@@ -1,0 +1,167 @@
+---
+import Legal from '../layouts/Legal.astro';
+---
+
+<Legal
+  title="Terms of Service — InvoicePass"
+  description="The terms governing your use of InvoicePass."
+  eyebrow="Legal · Terms"
+  heading={`Terms of <span class="accent">service</span>`}
+  subhead="The agreement between you and InvoicePass when you use the product, the API, or any of our hosted endpoints."
+  effectiveDate="April 1, 2026"
+>
+  <h2>1. Who this is between</h2>
+  <p>
+    These Terms are an agreement between you (the customer) and <strong>InvoicePass
+    Holdings Inc.</strong>, an Ontario corporation operating from Toronto, Canada. By
+    creating an account, sending mail to an InvoicePass-hosted address, or calling
+    the API, you agree to these Terms.
+  </p>
+
+  <h2>2. The service</h2>
+  <p>
+    InvoicePass ingests inbound invoice mail, deduplicates, signs, and forwards
+    receipts to your destination of record. Specific endpoints, SDKs, and limits are
+    documented at <a href="/docs">/docs</a>. We may add features without notice. We
+    will give you at least 60 days' notice before deprecating any production
+    endpoint you depend on.
+  </p>
+
+  <h2>3. Your account</h2>
+  <ul>
+    <li>You are responsible for everything that happens on your account.</li>
+    <li>Don't share credentials. If you suspect a compromise, write
+      <a href="mailto:security@invoicepass.app">security@invoicepass.app</a> immediately.</li>
+    <li>You must be at least 18 and authorized to bind the organization on whose behalf
+      you sign up.</li>
+  </ul>
+
+  <h2>4. Acceptable use</h2>
+  <p>You may not, and you may not let anyone else:</p>
+  <ul>
+    <li>Use InvoicePass to send unsolicited bulk mail or to facilitate fraud.</li>
+    <li>Probe, scan, or test the vulnerability of the service without prior written
+      authorization (see our <a href="/security">security</a> page for the bug bounty).</li>
+    <li>Reverse-engineer the service, except to the extent that local law expressly
+      permits it.</li>
+    <li>Resell, rent, or sublicense the service without a written agreement.</li>
+    <li>Upload content that is unlawful, infringing, or that you do not have the right
+      to process under your own contracts with your customers.</li>
+  </ul>
+
+  <h2>5. Pricing and billing</h2>
+  <p>
+    Plans, included volume, and overage rates are listed at <a href="/inbox#pricing">/inbox#pricing</a>.
+    Subscriptions are billed monthly or annually in advance. Overages are billed in arrears.
+    All fees are in USD and exclusive of taxes. Late invoices accrue interest at 1.0% per month
+    or the maximum rate permitted by law, whichever is lower.
+  </p>
+  <p>
+    You can cancel any time from the dashboard. Cancellation takes effect at the end of
+    the current billing period. We do not offer refunds for partial periods, but if
+    something goes sideways, write <a href="mailto:billing@invoicepass.app">billing@invoicepass.app</a>
+    — we are reasonable people.
+  </p>
+
+  <h2>6. Service level (SLA)</h2>
+  <p>
+    For paid plans, we target <strong>99.9% monthly uptime</strong> on the SMTP
+    ingress and HTTP API endpoints. If we miss it, we credit your next invoice on a
+    sliding scale:
+  </p>
+  <table class="legal-table">
+    <thead>
+      <tr>
+        <th>Monthly uptime</th>
+        <th>Service credit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>&lt; 99.9% and ≥ 99.0%</td>
+        <td>10% of monthly fee</td>
+      </tr>
+      <tr>
+        <td>&lt; 99.0% and ≥ 95.0%</td>
+        <td>25% of monthly fee</td>
+      </tr>
+      <tr>
+        <td>&lt; 95.0%</td>
+        <td>50% of monthly fee</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Service credits are your sole remedy for missed uptime targets.</p>
+
+  <h2>7. Your data, our boundaries</h2>
+  <p>
+    You own your data. We process it on your behalf under the <a href="/dpa">Data Processing
+    Agreement</a>. We do not train models on your payloads. Aggregated, anonymized
+    metrics (counts, error rates, throughput) may be used to operate and improve the service.
+  </p>
+
+  <h2>8. Intellectual property</h2>
+  <p>
+    InvoicePass, the name, the logo, and the protocol specification are ours. You get a
+    non-exclusive, non-transferable, worldwide license to use the service for the duration
+    of your subscription. Feedback you send us, we can use freely without obligation.
+  </p>
+
+  <h2>9. Confidentiality</h2>
+  <p>
+    Each side will protect the other's non-public information with the same care it uses
+    for its own (and not less than reasonable care). Confidential information does not
+    include anything that becomes public through no fault of the receiving party.
+  </p>
+
+  <h2>10. Warranties and disclaimers</h2>
+  <p>
+    The service is provided <strong>"as is"</strong>. We make no warranty of merchantability,
+    fitness for a particular purpose, or non-infringement, except where local law forbids
+    excluding them.
+  </p>
+
+  <h2>11. Limitation of liability</h2>
+  <p>
+    To the maximum extent permitted by law, neither party is liable for indirect,
+    incidental, special, consequential, or punitive damages, or for lost profits or
+    revenues. Total aggregate liability for any claim arising out of or related to the
+    Terms is capped at <strong>the fees you paid us in the 12 months before the claim
+    arose</strong>.
+  </p>
+
+  <h2>12. Indemnification</h2>
+  <p>
+    You will defend us against third-party claims that your data, or your use of the
+    service in breach of these Terms, infringes their rights or violates the law. We
+    will defend you against third-party claims that our service, used as designed,
+    infringes their IP rights.
+  </p>
+
+  <h2>13. Termination</h2>
+  <p>
+    Either side may terminate for material breach the other side does not fix within
+    30 days of notice. We may suspend the service immediately if your use creates a
+    security or legal risk. On termination, you have 30 days to export your data via
+    <a href="/data-export">/data-export</a>.
+  </p>
+
+  <h2>14. Governing law</h2>
+  <p>
+    These Terms are governed by the laws of the <strong>Province of Ontario</strong>
+    and the federal laws of Canada applicable there. Disputes go to the courts located
+    in Toronto, Ontario, and both sides consent to that jurisdiction.
+  </p>
+
+  <h2>15. Changes</h2>
+  <p>
+    We may update these Terms. Material changes get at least 30 days' notice via email.
+    Continued use after the effective date counts as acceptance.
+  </p>
+
+  <h2>16. Contact</h2>
+  <p>
+    Questions? <a href="mailto:legal@invoicepass.app">legal@invoicepass.app</a>.
+    Mailing address available on request.
+  </p>
+</Legal>

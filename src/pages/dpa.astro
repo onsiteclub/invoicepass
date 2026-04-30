@@ -1,0 +1,160 @@
+---
+import Legal from '../layouts/Legal.astro';
+---
+
+<Legal
+  title="Data Processing Agreement — InvoicePass"
+  description="The DPA governing InvoicePass's processing of personal data on behalf of customers."
+  eyebrow="Legal · DPA"
+  heading={`Data processing <span class="accent">agreement</span>`}
+  subhead="The processor agreement that sits underneath your subscription. Aligned with GDPR Art. 28 and PIPEDA. Countersigned versions available on request."
+  effectiveDate="April 1, 2026"
+>
+  <h2>1. Roles</h2>
+  <p>
+    For all personal data you submit to InvoicePass, you are the <strong>controller</strong>
+    and InvoicePass is the <strong>processor</strong>. We process the data only on your
+    documented instructions, which are the Order Form, the <a href="/terms">Terms of
+    Service</a>, and any written request you send us through your administrator account.
+  </p>
+
+  <h2>2. Subject-matter and duration</h2>
+  <ul>
+    <li><strong>Subject:</strong> ingestion, dedup, signing, storage, and forwarding of invoice
+      payloads on behalf of the customer.</li>
+    <li><strong>Duration:</strong> the term of the subscription, plus the retention windows
+      stated in our <a href="/privacy">Privacy policy</a>.</li>
+    <li><strong>Nature and purpose:</strong> automated processing of business records to
+      enable accurate, deduplicated, signed delivery to a destination of record.</li>
+  </ul>
+
+  <h2>3. Categories of data and data subjects</h2>
+  <table class="legal-table">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Examples</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Operator account data</td>
+        <td>Name, work email, role, login timestamps</td>
+      </tr>
+      <tr>
+        <td>Vendor and counterparty data</td>
+        <td>Vendor name, contact email on incoming invoices</td>
+      </tr>
+      <tr>
+        <td>Invoice content</td>
+        <td>PDF text, line items, totals, references, due dates</td>
+      </tr>
+      <tr>
+        <td>Operational telemetry</td>
+        <td>Source IPs, request IDs, dedup hashes</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Data subjects:</strong> your operators (foremen, dispatchers, accounts payable
+    staff) and the natural persons named on inbound invoices.
+  </p>
+
+  <h2>4. Sub-processors</h2>
+  <p>
+    You authorize InvoicePass to use the sub-processors listed in our
+    <a href="/privacy#sub-processors">Privacy policy</a>. We provide at least
+    <strong>30 days' notice</strong> before adding or replacing a sub-processor. You
+    may object on reasonable grounds; if we cannot accommodate, you may terminate the
+    affected subscription on a pro-rated refund.
+  </p>
+
+  <h2>5. International transfers</h2>
+  <p>
+    Personal data is hosted in <code>ca-central-1</code>. Encrypted backups replicate
+    to <code>us-east-1</code>. For data originating in the European Economic Area or
+    the UK, we rely on the EU Standard Contractual Clauses (Module Two: controller to
+    processor) and the UK International Data Transfer Addendum, both incorporated by
+    reference into this DPA.
+  </p>
+
+  <h2>6. Security measures</h2>
+  <p>
+    We implement the technical and organizational measures described on our
+    <a href="/security">security page</a>. Highlights:
+  </p>
+  <ul>
+    <li>Encryption at rest (AES-256) and in transit (TLS 1.3).</li>
+    <li>Just-in-time, SSO-backed access to production with hardware key second factor.</li>
+    <li>Append-only audit log for every administrative action.</li>
+    <li>Annual third-party penetration test and quarterly internal restore drills.</li>
+    <li>Background checks for engineers with production access.</li>
+  </ul>
+
+  <h2>7. Confidentiality</h2>
+  <p>
+    Every InvoicePass employee and contractor with access to personal data is bound
+    by a written confidentiality agreement that survives termination of their engagement.
+  </p>
+
+  <h2>8. Assistance to the controller</h2>
+  <p>
+    Within the limits of what is technically feasible, we will assist you with:
+  </p>
+  <ul>
+    <li>Responding to data subject requests (access, correction, deletion, portability).</li>
+    <li>Carrying out data protection impact assessments and prior consultations with
+      supervisory authorities.</li>
+    <li>Meeting your security, breach-notification, and audit obligations.</li>
+  </ul>
+  <p>
+    Self-serve tools at <a href="/data-export">/data-export</a> cover most requests
+    without manual intervention.
+  </p>
+
+  <h2>9. Personal data breaches</h2>
+  <p>
+    We will notify you of a confirmed personal data breach affecting your data
+    <strong>without undue delay and no later than 72 hours</strong> after we become
+    aware of it. The notice will include the nature of the breach, categories and
+    approximate volume affected, likely consequences, and the measures we have taken
+    or propose to take.
+  </p>
+
+  <h2>10. Audits</h2>
+  <p>
+    Once per twelve-month period (or more often if required by a supervisory authority
+    or following a confirmed breach), you may audit our compliance with this DPA. We
+    will respond to audit requests with our most recent SOC 2 report, penetration test
+    summary, and a written questionnaire response within 20 business days. On-site
+    audits require 30 days' notice and a mutually executed NDA.
+  </p>
+
+  <h2>11. Return or deletion of data</h2>
+  <p>
+    On termination, you may export your data at any point during the 30 days following
+    your last billing period via <a href="/data-export">/data-export</a>. After that,
+    we hard-delete personal data within 60 days, except where retention is required by
+    law. We confirm deletion in writing on request.
+  </p>
+
+  <h2>12. Liability</h2>
+  <p>
+    Liability under this DPA is governed by the limitation of liability provision in
+    the <a href="/terms">Terms of Service</a>. Nothing in this DPA limits either party's
+    liability where applicable law prohibits such a limitation.
+  </p>
+
+  <h2>13. Conflict</h2>
+  <p>
+    If anything in this DPA conflicts with the Terms of Service in respect of the
+    processing of personal data, this DPA controls.
+  </p>
+
+  <h2>14. Signatures</h2>
+  <p>
+    A countersigned version of this DPA, on customer letterhead or via electronic
+    signature, is available on request from
+    <a href="mailto:legal@invoicepass.app">legal@invoicepass.app</a>.
+  </p>
+</Legal>
