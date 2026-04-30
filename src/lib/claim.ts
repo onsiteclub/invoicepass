@@ -1,16 +1,6 @@
 import { showToast } from './toast';
 import { createReservation, startCountdown } from './reservation';
-
-// Demo-time reserved handles. Real availability check happens server-side
-// when the protocol/portal is wired up; this list keeps the landing
-// honest about the fact that not every name is free.
-const TAKEN: ReadonlySet<string> = new Set([
-  'admin', 'support', 'help', 'team', 'test', 'demo', 'hello', 'info',
-  'silva', 'acme', 'stripe', 'paypal', 'amazon', 'google', 'apple',
-  'microsoft', 'invoicepass', 'inbox', 'mail', 'contact', 'sales',
-  'billing', 'finance', 'accounts', 'root', 'noreply', 'webmaster',
-  'postmaster', 'staff', 'office', 'company', 'me', 'you', 'app',
-]);
+import { isReservedHandle } from './reserved-handles';
 
 type State = 'empty' | 'short' | 'taken' | 'available';
 
@@ -21,7 +11,7 @@ export function sanitizeHandle(v: string): string {
 function getState(handle: string): State {
   if (!handle) return 'empty';
   if (handle.length < 3) return 'short';
-  if (TAKEN.has(handle)) return 'taken';
+  if (isReservedHandle(handle)) return 'taken';
   return 'available';
 }
 
@@ -45,7 +35,7 @@ function attachLiveValidation(form: HTMLFormElement, input: HTMLInputElement): v
     } else if (state === 'taken') {
       claim?.classList.add('is-taken');
       feedback.classList.add('taken');
-      feedback.textContent = `✗ ${cleaned}@invoicepass.app is already taken`;
+      feedback.textContent = `${cleaned}@invoicepass.app isn't available — pick another`;
     } else if (state === 'short') {
       feedback.textContent = '3+ characters · letters, numbers, hyphens';
     } else {
@@ -58,8 +48,8 @@ function attachLiveValidation(form: HTMLFormElement, input: HTMLInputElement): v
 }
 
 function rejectMessage(state: State, handle: string): string {
-  if (state === 'taken') return `"${handle}@invoicepass.app" is already taken — try another`;
-  if (state === 'short') return 'Handle must be 3+ characters, letters and numbers only';
+  if (state === 'taken') return `"${handle}@invoicepass.app" isn't available — pick another`;
+  if (state === 'short') return '3+ characters: letters, numbers, hyphens';
   return 'Pick a name to claim';
 }
 

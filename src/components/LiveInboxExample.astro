@@ -1,9 +1,15 @@
 ---
 const rows = [
-  { initials: 'CS', name: 'Cristony silva', sub: 'general contractor · 8 invoices', balance: '+$2,840.00', tone: 'green' as const, tag: 'owes you' },
-  { initials: 'LF', name: 'Lucas Framing',  sub: 'framing crew · 4 invoices',     balance: '−$1,420.00', tone: 'red' as const,   tag: 'you owe' },
-  { initials: 'MS', name: 'Maria Santos',   sub: 'cleaning crew · 12 invoices',   balance: '+$680.00',   tone: 'green' as const, tag: 'owes you' },
-  { initials: 'TF', name: 'Tiago Ferreira', sub: 'electrical · 3 invoices',       balance: '−$3,210.00', tone: 'red' as const,   tag: 'you owe' },
+  { initials: 'JC', name: 'James Carter',   sub: 'general contractor · 8 invoices', balance: '+$2,840.00', tone: 'green' as const, tag: 'owes you', highlight: true },
+  { initials: 'MS', name: 'Mike Sullivan',  sub: 'framing crew · 4 invoices',       balance: '−$1,420.00', tone: 'red' as const,   tag: 'you owe', highlight: false },
+  { initials: 'SM', name: 'Sarah Mitchell', sub: 'cleaning crew · 12 invoices',     balance: '+$680.00',   tone: 'green' as const, tag: 'owes you', highlight: false },
+  { initials: 'TB', name: 'Tom Bennett',    sub: 'electrical · 3 invoices',         balance: '−$3,210.00', tone: 'red' as const,   tag: 'you owe', highlight: false },
+];
+
+const ledger = [
+  { date: 'Apr 24', tx: 'Owed — open INV-112', credit: '$920.00',   balance: '+ $2,840.00' },
+  { date: 'Apr 18', tx: 'Owed — open INV-107', credit: '$1,240.00', balance: '+ $1,920.00' },
+  { date: 'Apr 12', tx: 'Owed — open INV-103', credit: '$680.00',   balance: '+ $680.00'   },
 ];
 ---
 
@@ -12,39 +18,96 @@ const rows = [
     <div class="section-head">
       <span class="eyebrow"><span class="blue-dot"></span>Real example</span>
       <h2><span class="primary-blue">This is the view.</span> <span class="accent">Sorted by person, not by date</span></h2>
-      <p>When you open your portal, this is what you see. Each row is a person you work with. Green means they owe you. Red means you owe them. Click to open their checkbook.</p>
+      <p>When you open your portal, this is what you see. Each row is a person you work with. Green means they owe you. Red means you owe them. Click to open their checkbook — log payments, settle up.</p>
     </div>
 
-    <div class="checkbooks-mock">
-      <div class="checkbooks-head">
-        <div class="checkbooks-head-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 7h18"/>
-            <path d="M3 12h18"/>
-            <path d="M3 17h12"/>
-          </svg>
-          Checkbooks
+    <div class="checkbooks-mock checkbooks-anim">
+      <!-- Scene 1 — checkbooks list -->
+      <div class="checkbooks-scene scene-list">
+        <div class="checkbooks-head">
+          <div class="checkbooks-head-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 7h18"/>
+              <path d="M3 12h18"/>
+              <path d="M3 17h12"/>
+            </svg>
+            Checkbooks
+          </div>
+          <span class="checkbooks-head-meta">4 people · this month</span>
         </div>
-        <span class="checkbooks-head-meta">4 people · this month</span>
+
+        <div class="checkbooks-list">
+          {rows.map(r => (
+            <div class={`checkbook-row${r.highlight ? ' is-highlighted' : ''}`}>
+              <div class="checkbook-avatar">{r.initials}</div>
+              <div class="checkbook-meta">
+                <span class="checkbook-name">{r.name}</span>
+                <span class="checkbook-sub">{r.sub}</span>
+              </div>
+              <span class={`checkbook-balance ${r.tone}`}>{r.balance}</span>
+              <span class={`checkbook-tag ${r.tone}`}>{r.tag}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div class="checkbooks-list">
-        {rows.map(r => (
-          <div class="checkbook-row">
-            <div class="checkbook-avatar">{r.initials}</div>
-            <div class="checkbook-meta">
-              <span class="checkbook-name">{r.name}</span>
-              <span class="checkbook-sub">{r.sub}</span>
-            </div>
-            <span class={`checkbook-balance ${r.tone}`}>{r.balance}</span>
-            <span class={`checkbook-tag ${r.tone}`}>{r.tag}</span>
+      <!-- Scene 2 — open checkbook (Cristony's detail view) -->
+      <div class="checkbooks-scene scene-detail" aria-hidden="true">
+        <div class="checkbooks-head">
+          <div class="checkbooks-head-title">
+            <span class="ck-back" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </span>
+            <span class="ck-detail-avatar">JC</span>
+            <span class="ck-detail-name">James Carter</span>
           </div>
-        ))}
+          <span class="ck-detail-balance">
+            <span class="ck-balance-was">+$2,840.00</span>
+            <span class="ck-balance-new">$0.00</span>
+          </span>
+        </div>
+
+        <div class="ck-toolbar">
+          <button class="ck-btn ck-btn-invoice" type="button" tabindex="-1">+ Add invoice</button>
+          <button class="ck-btn ck-btn-payment" type="button" tabindex="-1">+ Add payment</button>
+          <button class="ck-btn ck-btn-secondary" type="button" tabindex="-1">Print</button>
+          <button class="ck-btn ck-btn-secondary" type="button" tabindex="-1">Share</button>
+          <button class="ck-btn ck-btn-secondary" type="button" tabindex="-1">Close out</button>
+          <button class="ck-btn ck-btn-text" type="button" tabindex="-1">Edit</button>
+        </div>
+
+        <div class="ck-table">
+          <div class="ck-table-head">
+            <span class="ck-th">Date</span>
+            <span class="ck-th">Transaction</span>
+            <span class="ck-th ck-th-num">Debit</span>
+            <span class="ck-th ck-th-num">Credit</span>
+            <span class="ck-th ck-th-num">Balance</span>
+          </div>
+
+          <div class="ck-table-row ck-row-new">
+            <span class="ck-td-date">Apr 28</span>
+            <span class="ck-td-tx"><strong>Paid</strong> — Manual payment</span>
+            <span class="ck-td-num red">$2,840.00</span>
+            <span class="ck-td-num"></span>
+            <span class="ck-td-num">$0.00</span>
+          </div>
+
+          {ledger.map(e => (
+            <div class="ck-table-row">
+              <span class="ck-td-date">{e.date}</span>
+              <span class="ck-td-tx">{e.tx}</span>
+              <span class="ck-td-num"></span>
+              <span class="ck-td-num green">{e.credit}</span>
+              <span class="ck-td-num green">{e.balance}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
 
     <p class="live-inbox-caption">
-      This is the view from your Checkbooks tab — every person you work with, at a glance.
+      Open a checkbook → see every invoice, log a payment, watch the balance settle to zero.
     </p>
   </div>
 </section>

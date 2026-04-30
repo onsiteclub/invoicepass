@@ -125,3 +125,299 @@
   }
   .checkbook-row .checkbook-tag { display: none; }
 }
+
+/* ============================================================
+   Two-scene animation: checkbooks list → open checkbook detail
+   Cycles through ~14s loop, pauses on prefers-reduced-motion.
+   ============================================================ */
+
+.checkbooks-anim {
+  position: relative;
+  overflow: hidden;
+}
+
+.checkbooks-scene { position: relative; }
+
+.scene-detail {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Detail header — replaces the back button + avatar + name in the existing header slot */
+.ck-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  margin-right: 4px;
+}
+
+.ck-detail-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.ck-detail-name {
+  font-size: 13.5px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.ck-detail-balance {
+  display: inline-grid;
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 100px;
+}
+
+.ck-balance-was,
+.ck-balance-new {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ck-balance-was { color: var(--green); }
+.ck-balance-new { color: var(--ink-4); opacity: 0; }
+
+/* Toolbar — action row above the ledger table */
+.ck-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.ck-btn {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+}
+
+.ck-btn-invoice {
+  color: var(--green);
+  border-color: rgba(24, 169, 87, 0.35);
+}
+
+.ck-btn-payment {
+  color: var(--red);
+  border-color: rgba(220, 74, 74, 0.35);
+}
+
+.ck-btn-text {
+  border-color: transparent;
+  padding-left: 8px;
+  padding-right: 8px;
+  color: var(--ink-3);
+}
+
+/* Ledger table */
+.ck-table { display: flex; flex-direction: column; flex: 1; }
+
+.ck-table-head,
+.ck-table-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 110px 110px 110px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 22px;
+}
+
+.ck-table-head {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.ck-th {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-4);
+  font-weight: 500;
+}
+
+.ck-th-num { text-align: right; }
+
+.ck-table-row {
+  border-bottom: 1px dashed var(--border-soft);
+  font-size: 13px;
+}
+
+.ck-table-row:last-child { border-bottom: 0; }
+
+.ck-td-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ck-td-tx {
+  color: var(--ink-2);
+  letter-spacing: -0.005em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ck-td-tx strong { color: var(--ink); font-weight: 500; }
+
+.ck-td-num {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ink-2);
+}
+
+.ck-td-num.green { color: var(--green); }
+.ck-td-num.red   { color: var(--red); }
+
+/* New row — collapsed by default (in case animation never runs / reduced motion) */
+.ck-row-new {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-bottom-width: 0;
+}
+
+@media (max-width: 700px) {
+  .ck-toolbar { padding: 12px 16px; gap: 6px; }
+  .ck-btn { font-size: 11.5px; padding: 6px 10px; }
+  .ck-table-head,
+  .ck-table-row {
+    grid-template-columns: 56px 1fr 90px;
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  /* hide debit + credit columns on small screens, keep date/tx/balance */
+  .ck-table-head .ck-th:nth-child(3),
+  .ck-table-head .ck-th:nth-child(4),
+  .ck-table-row > :nth-child(3),
+  .ck-table-row > :nth-child(4) { display: none; }
+  .ck-detail-name { font-size: 12.5px; }
+  .ck-detail-avatar { width: 22px; height: 22px; font-size: 10px; }
+}
+
+/* ----- Animation: only when motion is OK ----- */
+@media (prefers-reduced-motion: no-preference) {
+  .scene-list     { animation: cb-list-cycle     14s ease-in-out infinite; }
+  .scene-detail   { animation: cb-detail-cycle   14s ease-in-out infinite; }
+  .checkbook-row.is-highlighted { animation: cb-row-hover 14s ease-in-out infinite; }
+  .ck-btn-payment { animation: cb-payment-pulse  14s ease-in-out infinite; }
+  .ck-row-new     { animation: cb-row-new        14s ease-in-out infinite; }
+  .ck-balance-was { animation: cb-balance-was    14s ease-in-out infinite; }
+  .ck-balance-new { animation: cb-balance-new    14s ease-in-out infinite; }
+}
+
+/* List visible 0–18%, exits left 18–25%, hidden 25–82%,
+   returns from left 82–92%, visible 92–100%. */
+@keyframes cb-list-cycle {
+  0%, 18%   { opacity: 1; transform: translateX(0); }
+  25%, 82%  { opacity: 0; transform: translateX(-14px); }
+  92%, 100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Detail enters from right 18–25%, visible 25–82%, exits right 82–92%. */
+@keyframes cb-detail-cycle {
+  0%, 18%   { opacity: 0; transform: translateX(14px); }
+  25%, 82%  { opacity: 1; transform: translateX(0); }
+  92%, 100% { opacity: 0; transform: translateX(14px); }
+}
+
+/* Hover/focus highlight on the Cristony row, just before scene transitions. */
+@keyframes cb-row-hover {
+  0%, 8%    { background: transparent; }
+  14%, 22%  { background: var(--surface-2); }
+}
+
+/* "+ Add payment" button pulses just before the new row appears — the
+   visual cue that "this button was clicked". Outer red glow that decays. */
+@keyframes cb-payment-pulse {
+  0%, 40%   { background: var(--surface); box-shadow: 0 0 0 0 rgba(220, 74, 74, 0); }
+  46%       { background: rgba(220, 74, 74, 0.08); box-shadow: 0 0 0 4px rgba(220, 74, 74, 0.18); }
+  52%       { background: rgba(220, 74, 74, 0.05); box-shadow: 0 0 0 8px rgba(220, 74, 74, 0); }
+  58%, 100% { background: var(--surface); box-shadow: 0 0 0 0 rgba(220, 74, 74, 0); }
+}
+
+/* New payment row appears at the TOP of the table — collapses height,
+   padding, and border to 0 when hidden so existing rows shift down on
+   reveal. Brief green-soft flash signals "just added". */
+@keyframes cb-row-new {
+  0%, 50% {
+    max-height: 0; opacity: 0;
+    padding-top: 0; padding-bottom: 0;
+    border-bottom-width: 0;
+    background: transparent;
+  }
+  56% {
+    max-height: 50px; opacity: 0.5;
+    padding-top: 12px; padding-bottom: 12px;
+    border-bottom-width: 1px;
+    background: var(--green-soft);
+  }
+  62%, 70% {
+    max-height: 50px; opacity: 1;
+    padding-top: 12px; padding-bottom: 12px;
+    border-bottom-width: 1px;
+    background: var(--green-soft);
+  }
+  78%, 82% {
+    max-height: 50px; opacity: 1;
+    padding-top: 12px; padding-bottom: 12px;
+    border-bottom-width: 1px;
+    background: transparent;
+  }
+  92%, 100% {
+    max-height: 0; opacity: 0;
+    padding-top: 0; padding-bottom: 0;
+    border-bottom-width: 0;
+    background: transparent;
+  }
+}
+
+/* Balance crossfade: old value fades out as the new value fades in,
+   timed to land just after the payment row settles. */
+@keyframes cb-balance-was {
+  0%, 56%   { opacity: 1; }
+  64%, 100% { opacity: 0; }
+}
+
+@keyframes cb-balance-new {
+  0%, 60%   { opacity: 0; }
+  68%, 82%  { opacity: 1; }
+  92%, 100% { opacity: 0; }
+}
