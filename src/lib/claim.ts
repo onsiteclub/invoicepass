@@ -1,5 +1,5 @@
 import { showToast } from './toast';
-import { createReservation, startCountdown } from './reservation';
+import { buildPortalUrl, createReservation } from './reservation';
 import { isReservedHandle } from './reserved-handles';
 
 type State = 'empty' | 'short' | 'taken' | 'available';
@@ -78,60 +78,21 @@ function setupForm(opts: {
   return { form, input };
 }
 
-function getClaimWrap(form: HTMLElement | null): HTMLElement | null {
-  const wrap = form?.closest('.claim-card, .claim-wrap');
-  return wrap as HTMLElement | null;
-}
-
-function showSuccessOp(handle: string, formInput: HTMLInputElement | null): void {
-  const result = document.getElementById('handleResultOp');
-  const email = document.getElementById('handleEmailOp');
-  const success = document.getElementById('claimSuccessOp');
-  const form = document.getElementById('claimFormOp');
-  const wrap = getClaimWrap(form);
-
-  if (result) result.textContent = handle;
-  if (email) email.textContent = handle;
-  if (success) success.classList.add('shown');
-  if (wrap) wrap.style.display = 'none';
-
-  if (!success) return;
+function handoffToPortal(handle: string): void {
   const reservation = createReservation(handle);
-  startCountdown(reservation, success, () => {
-    success.classList.remove('shown');
-    if (wrap) wrap.style.display = '';
-    if (formInput) {
-      formInput.value = '';
-      formInput.dispatchEvent(new Event('input'));
-      formInput.focus();
-    }
-  });
+  window.location.href = buildPortalUrl(reservation);
 }
 
 export function initClaimForms(): void {
-  const opForm = setupForm({
+  setupForm({
     formId: 'claimFormOp',
     inputId: 'handleInputOp',
-    onSuccess(handle) {
-      showSuccessOp(handle, opForm?.input ?? null);
-      showToast(`Inbox "${handle}@invoicepass.app" reserved · 15 min to finish signup`);
-    },
+    onSuccess: handoffToPortal,
   });
 
-  // CTA → propagate handle to hero form and replay submit there
   setupForm({
     formId: 'claimFormBottom',
     inputId: 'handleInputBottom',
-    onSuccess(handle) {
-      showToast(`Inbox "${handle}@invoicepass.app" reserved · check the top of the page for next steps`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setTimeout(() => {
-        if (opForm) {
-          opForm.input.value = handle;
-          opForm.input.dispatchEvent(new Event('input'));
-          opForm.form.dispatchEvent(new Event('submit'));
-        }
-      }, 600);
-    },
+    onSuccess: handoffToPortal,
   });
 }
