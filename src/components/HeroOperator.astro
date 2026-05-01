@@ -1,31 +1,29 @@
 ---
 import ClaimForm from './ClaimForm.astro';
-import InboxMock from './InboxMock.astro';
 ---
 
-<section class="hero" id="claim-hero">
-  <div class="container">
-    <div class="hero-grid">
+<section class="hero hero-op" id="claim-hero">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-bg-solid"></div>
+    <div class="hero-bg-dots"></div>
+  </div>
 
-      <div>
-        <div class="hero-eyebrow eyebrow"><span class="blue-dot"></span>For foremen, contractors, and crews</div>
+  <div class="container hero-op-content">
+    <div class="hero-eyebrow eyebrow"><span class="blue-dot"></span>For contractors and crew leaders</div>
 
-        <h1><span class="primary-blue">Every invoice.</span> <span class="accent">In one inbox</span></h1>
+    <h1><span class="primary-blue">Every invoice.</span> <span class="accent">In one inbox</span></h1>
 
-        <p class="hero-sub">
-          Forward invoices from anywhere. Sorted by person. Settle at month end.
-        </p>
+    <p class="hero-sub">
+      Forward invoices from anywhere. Sorted by person. Settle at month end.
+    </p>
 
-        <ClaimForm formId="claimFormOp" inputId="handleInputOp" howLinkId="howLinkOp">
-          <div class="claim-note" slot="note">
-            <span class="check">✓</span>
-            Free up to 10 users · No credit card · One inbox per operator
-          </div>
-        </ClaimForm>
-      </div>
-
-      <InboxMock />
-
+    <div class="hero-claim-wrap">
+      <ClaimForm formId="claimFormOp" inputId="handleInputOp" howLinkId="howLinkOp">
+        <div class="claim-note" slot="note">
+          <span class="check">✓</span>
+          Free up to 10 users · No credit card · One inbox per operator
+        </div>
+      </ClaimForm>
     </div>
   </div>
 </section>

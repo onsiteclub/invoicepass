@@ -46,7 +46,7 @@ h1::after {
   border-radius: 50%;
   margin-left: 0.18em;
   vertical-align: baseline;
-  transform: translateY(0.18em);
+  transform: translateY(0.02em);
 }
 
 h2::after {
@@ -58,7 +58,7 @@ h2::after {
   border-radius: 50%;
   margin-left: 0.14em;
   vertical-align: baseline;
-  transform: translateY(0.125em);
+  transform: translateY(0.01em);
 }
 
 

@@ -70,3 +70,148 @@
   color: var(--ink-4);
   letter-spacing: 0.01em;
 }
+
+/* ─── operator hero — centered, single column ─── */
+.hero-op { padding: 120px 0 96px; }
+
+@media (max-width: 720px) {
+  .hero-op { padding: 64px 0 64px; }
+}
+
+.hero-op-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 780px;
+}
+
+.hero-op-content .hero-eyebrow,
+.hero-op-content .hero-sub {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-op-content h1 { max-width: 18ch; margin-left: auto; margin-right: auto; }
+
+.hero-op-content .hero-sub { max-width: 540px; }
+
+/* claim card centering + halo aura — card on top, note below */
+.hero-claim-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.hero-claim-wrap .claim-card {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  text-align: left;
+}
+
+.hero-claim-wrap .claim-card::before {
+  content: '';
+  position: absolute;
+  inset: -32px -16px;
+  background: radial-gradient(closest-side, var(--blue-soft) 0%, rgba(220, 232, 250, 0) 72%);
+  filter: blur(32px);
+  opacity: 0.85;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hero-claim-wrap .claim-note {
+  margin-top: 18px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .hero-claim-wrap .claim-note {
+    white-space: normal;
+    max-width: 320px;
+  }
+}
+
+/* ─── decorative dot-grid background (solid blue → dots → white) ─── */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* bottom band: solid blue fading up into transparent */
+.hero-bg-solid {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 42%;
+  background: linear-gradient(
+    to top,
+    var(--blue-soft) 0%,
+    var(--blue-soft) 18%,
+    rgba(220, 232, 250, 0) 100%
+  );
+}
+
+/* dot grid — fades in from the top (white area), dense in middle, dissolves into the solid below */
+.hero-bg-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--blue) 1.3px, transparent 1.6px);
+  background-size: 20px 20px;
+  background-position: 10px 10px;
+  opacity: 0.45;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 24%,
+    rgba(0, 0, 0, 0.95) 56%,
+    rgba(0, 0, 0, 0.55) 78%,
+    transparent 96%
+  );
+          mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 24%,
+    rgba(0, 0, 0, 0.95) 56%,
+    rgba(0, 0, 0, 0.55) 78%,
+    transparent 96%
+  );
+}
+
+/* ─── staggered entry animation for hero content ─── */
+.hero-op-content > .hero-eyebrow,
+.hero-op-content > h1,
+.hero-op-content > .hero-sub,
+.hero-op-content > .hero-claim-wrap {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: hero-fade-in-up 0.6s ease-out forwards;
+}
+
+.hero-op-content > .hero-eyebrow    { animation-delay: 0ms; }
+.hero-op-content > h1                { animation-delay: 120ms; }
+.hero-op-content > .hero-sub         { animation-delay: 240ms; }
+.hero-op-content > .hero-claim-wrap  { animation-delay: 360ms; }
+
+@keyframes hero-fade-in-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-wave-back,
+  .hero-wave-front { animation: none; }
+
+  .hero-op-content > .hero-eyebrow,
+  .hero-op-content > h1,
+  .hero-op-content > .hero-sub,
+  .hero-op-content > .hero-claim-wrap {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}

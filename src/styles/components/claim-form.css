@@ -128,16 +128,48 @@
   font-size: 13.5px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, box-shadow 0.2s, transform 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
+.claim-btn-arrow {
+  display: inline-block;
+  margin-left: 2px;
+  transition: transform 0.18s ease-out;
+}
+
 @media (hover: hover) {
   .claim-btn:hover { background: var(--ink-2); }
+  .claim-btn:hover .claim-btn-arrow { transform: translateX(3px); }
 }
 @media (hover: none) {
   .claim-btn:active { background: var(--ink-2); transform: scale(0.985); }
+}
+
+/* "ready" cue — fires when the input has a valid available handle */
+.claim.is-available + .claim-btn {
+  box-shadow: 0 0 0 3px rgba(30, 95, 204, 0.14);
+  animation: claim-btn-ready 2s ease-in-out infinite;
+}
+
+.claim.is-available + .claim-btn .claim-btn-arrow {
+  animation: claim-btn-arrow-nudge 2s ease-in-out infinite;
+}
+
+@keyframes claim-btn-ready {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(30, 95, 204, 0.14); }
+  50%      { box-shadow: 0 0 0 6px rgba(30, 95, 204, 0.05); }
+}
+
+@keyframes claim-btn-arrow-nudge {
+  0%, 60%, 100% { transform: translateX(0); }
+  30%           { transform: translateX(2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .claim.is-available + .claim-btn,
+  .claim.is-available + .claim-btn .claim-btn-arrow { animation: none; }
 }
 
 .claim-feedback {

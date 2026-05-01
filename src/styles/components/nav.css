@@ -96,6 +96,46 @@ nav {
   .nav-links, .status-pill { display: none; }
 }
 
+/* ─── brand mark animations (nav variant only) ─── */
+.brand-mark .brand-stroke {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: right center;
+}
+
+.brand-mark-anim .brand-stroke-1 { animation: brand-stroke-in 3.4s ease-in-out infinite; animation-delay: 0s; }
+.brand-mark-anim .brand-stroke-2 { animation: brand-stroke-in 3.4s ease-in-out infinite; animation-delay: 0.18s; }
+.brand-mark-anim .brand-stroke-3 { animation: brand-stroke-in 3.4s ease-in-out infinite; animation-delay: 0.36s; }
+
+@keyframes brand-stroke-in {
+  0%   { opacity: 0; transform: translateX(-6px); }
+  20%  { opacity: 1; transform: translateX(0); }
+  55%  { opacity: 1; transform: translateX(0); }
+  75%  { opacity: 0; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-6px); }
+}
+
+.brand-mark-anim .brand-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: brand-dot-pulse 2.8s ease-out infinite;
+}
+
+@keyframes brand-dot-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); filter: drop-shadow(0 0 3px rgba(232, 163, 58, 0.55)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-mark-anim .brand-stroke,
+  .brand-mark-anim .brand-dot {
+    animation: none;
+  }
+  .brand-mark-anim .brand-stroke-1 { opacity: 1; }
+  .brand-mark-anim .brand-stroke-2 { opacity: 0.6; }
+  .brand-mark-anim .brand-stroke-3 { opacity: 0.4; }
+}
+
 /* cross-page link (For teams → / For developers →) */
 .nav-cross {
   display: inline-flex;

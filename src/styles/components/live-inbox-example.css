@@ -334,13 +334,13 @@
 
 /* ----- Animation: only when motion is OK ----- */
 @media (prefers-reduced-motion: no-preference) {
-  .scene-list     { animation: cb-list-cycle     14s ease-in-out infinite; }
-  .scene-detail   { animation: cb-detail-cycle   14s ease-in-out infinite; }
-  .checkbook-row.is-highlighted { animation: cb-row-hover 14s ease-in-out infinite; }
-  .ck-btn-payment { animation: cb-payment-pulse  14s ease-in-out infinite; }
-  .ck-row-new     { animation: cb-row-new        14s ease-in-out infinite; }
-  .ck-balance-was { animation: cb-balance-was    14s ease-in-out infinite; }
-  .ck-balance-new { animation: cb-balance-new    14s ease-in-out infinite; }
+  .scene-list     { animation: cb-list-cycle     7s ease-in-out infinite; }
+  .scene-detail   { animation: cb-detail-cycle   7s ease-in-out infinite; }
+  .checkbook-row.is-highlighted { animation: cb-row-hover 7s ease-in-out infinite; }
+  .ck-btn-payment { animation: cb-payment-pulse  7s ease-in-out infinite; }
+  .ck-row-new     { animation: cb-row-new        7s ease-in-out infinite; }
+  .ck-balance-was { animation: cb-balance-was    7s ease-in-out infinite; }
+  .ck-balance-new { animation: cb-balance-new    7s ease-in-out infinite; }
 }
 
 /* List visible 0–18%, exits left 18–25%, hidden 25–82%,
