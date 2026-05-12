@@ -1,16 +1,5 @@
 ---
 import Logo from './Logo.astro';
-
-interface Props {
-  variant?: 'dev' | 'op';
-}
-
-const { variant = 'dev' } = Astro.props;
-const isDev = variant === 'dev';
-
-const brandText = isDev
-  ? 'The invoice ingestion layer. Signed, deduped, delivered exactly once.'
-  : 'The working ledger for the people who build.';
 ---
 
 <footer>
@@ -21,94 +10,44 @@ const brandText = isDev
           <Logo variant="compact" />
           <span class="logo-text">Invoice<span class="logo-flow">Pass</span></span>
         </div>
-        <p class="footer-brand-text">{brandText}</p>
+        <p class="footer-brand-text">The working ledger for the people who build.</p>
       </div>
 
-      {isDev ? (
-        <>
-          <div class="footer-col">
-            <h4>Product</h4>
-            <ul>
-              <li><a href="#protocol">Protocol</a></li>
-              <li><a href="#integrate">API</a></li>
-              <li><a href="#status">Status</a></li>
-              <li><a href="#" data-stub>Changelog</a></li>
-            </ul>
-          </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#how">How it works</a></li>
+          <li><a href="/#pricing">Pricing</a></li>
+          <li><a href="/security">Security</a></li>
+        </ul>
+      </div>
 
-          <div class="footer-col">
-            <h4>Developers</h4>
-            <ul>
-              <li><a href="#" data-stub>Documentation</a></li>
-              <li><a href="#" data-stub>API reference</a></li>
-              <li><a href="#" data-stub>Webhooks</a></li>
-              <li><a href="#" data-stub>SDKs</a></li>
-            </ul>
-          </div>
+      <div class="footer-col">
+        <h4>For teams</h4>
+        <ul>
+          <li><a href="#" data-stub>For foremen</a></li>
+          <li><a href="#" data-stub>For contractors</a></li>
+          <li><a href="#" data-stub>For cleaning crews</a></li>
+          <li><a href="#" data-stub>For drivers</a></li>
+        </ul>
+      </div>
 
-          <div class="footer-col">
-            <h4>For teams</h4>
-            <ul>
-              <li><a href="/inbox">For foremen</a></li>
-              <li><a href="/inbox">For contractors</a></li>
-              <li><a href="/inbox#how">How it works</a></li>
-              <li><a href="/inbox#pricing">Pricing</a></li>
-            </ul>
-          </div>
+      <div class="footer-col">
+        <h4>Developers</h4>
+        <ul>
+          <li><a href="/#developers">Get in touch</a></li>
+        </ul>
+      </div>
 
-          <div class="footer-col">
-            <h4>Legal</h4>
-            <ul>
-              <li><a href="/privacy">Privacy</a></li>
-              <li><a href="/terms">Terms</a></li>
-              <li><a href="/dpa">DPA</a></li>
-              <li><a href="/security">Security</a></li>
-            </ul>
-          </div>
-        </>
-      ) : (
-        <>
-          <div class="footer-col">
-            <h4>Product</h4>
-            <ul>
-              <li><a href="#how">How it works</a></li>
-              <li><a href="#pricing">Pricing</a></li>
-              <li><a href="/security">Security</a></li>
-              <li><a href="#status">Status</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4>For teams</h4>
-            <ul>
-              <li><a href="#" data-stub>For foremen</a></li>
-              <li><a href="#" data-stub>For contractors</a></li>
-              <li><a href="#" data-stub>For cleaning crews</a></li>
-              <li><a href="#" data-stub>For drivers</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4>Developers</h4>
-            <ul>
-              <li><a href="/#integrate">API</a></li>
-              <li><a href="/" data-stub>Documentation</a></li>
-              <li><a href="/#protocol">Protocol</a></li>
-              <li><a href="/" data-stub>Changelog</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4>Legal</h4>
-            <ul>
-              <li><a href="/privacy">Privacy</a></li>
-              <li><a href="/terms">Terms</a></li>
-              <li><a href="/data-export">Data export</a></li>
-              <li><a href="/security">Security</a></li>
-            </ul>
-          </div>
-        </>
-      )}
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+          <li><a href="/data-export">Data export</a></li>
+          <li><a href="/security">Security</a></li>
+        </ul>
+      </div>
     </div>
 
     <div class="footer-bottom">

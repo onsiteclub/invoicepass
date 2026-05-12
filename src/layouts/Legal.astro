@@ -11,7 +11,6 @@ interface Props {
   heading: string;
   subhead?: string;
   effectiveDate?: string;
-  variant?: 'dev' | 'op';
 }
 
 const {
@@ -21,12 +20,11 @@ const {
   heading,
   subhead,
   effectiveDate,
-  variant = 'dev',
 } = Astro.props;
 ---
 
 <Base title={title} description={description}>
-  <Nav variant={variant} />
+  <Nav />
 
   <main class="legal-page">
     <div class="container legal-container">
@@ -52,6 +50,6 @@ const {
     </div>
   </main>
 
-  <Footer variant={variant} />
+  <Footer />
   <ContactModal />
 </Base>

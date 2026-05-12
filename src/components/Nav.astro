@@ -1,12 +1,5 @@
 ---
 import Logo from './Logo.astro';
-
-interface Props {
-  variant?: 'dev' | 'op';
-}
-
-const { variant = 'dev' } = Astro.props;
-const isDev = variant === 'dev';
 ---
 
 <nav>
@@ -18,29 +11,12 @@ const isDev = variant === 'dev';
 
     <div class="nav-right">
       <div class="nav-links">
-        {isDev ? (
-          <>
-            <a href="#protocol">Protocol</a>
-            <a href="#integrate">Integrate</a>
-          </>
-        ) : (
-          <>
-            <a href="#how">How it works</a>
-            <a href="#pricing">Pricing</a>
-          </>
-        )}
-        <a class="nav-cross" href={isDev ? '/inbox' : '/'}>
-          {isDev ? 'For teams' : 'For developers'}
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
+        <a href="#how">How it works</a>
+        <a href="https://make.invoicepass.app">Make an invoice</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#developers">Developers</a>
       </div>
 
-      {isDev && (
-        <span class="status-pill">
-          <span class="dot"></span>
-          all systems operational
-        </span>
-      )}
       <a href="https://portal.invoicepass.app" class="btn btn-ghost">Sign in</a>
     </div>
   </div>

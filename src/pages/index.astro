@@ -1,33 +1,59 @@
 ---
 import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
-import HeroDeveloper from '../components/HeroDeveloper.astro';
-// import WhyThisExists from '../components/WhyThisExists.astro';
-import TrustBand from '../components/TrustBand.astro';
-import PipelineSection from '../components/PipelineSection.astro';
-import IntegrateSection from '../components/IntegrateSection.astro';
-import StatusPage from '../components/StatusPage.astro';
-import SchemaPreview from '../components/SchemaPreview.astro';
+import HeroOperator from '../components/HeroOperator.astro';
+import HowItWorksSection from '../components/HowItWorksSection.astro';
+import LiveInboxExample from '../components/LiveInboxExample.astro';
+import PricingSection from '../components/PricingSection.astro';
 import Footer from '../components/Footer.astro';
-import DevSignupModal from '../components/DevSignupModal.astro';
-import WelcomeModal from '../components/WelcomeModal.astro';
+import HowItWorksModal from '../components/HowItWorksModal.astro';
+import ContactModal from '../components/ContactModal.astro';
 import Toast from '../components/Toast.astro';
 ---
 
 <Base
-  title="InvoicePass — The invoice ingestion layer"
-  description="The invoice ingestion layer for engineers. SMTP ingress, deterministic dedup, signed delivery. Stop building invoice plumbing."
+  title="InvoicePass — A working ledger for foremen, contractors, and crews"
+  description="Every invoice you get, in one inbox. Sorted by person. See who owes you, who you owe, and settle up at the end of the month. Free for crews up to 10 people."
 >
-  <Nav variant="dev" />
-  <HeroDeveloper />
-  {/* <WhyThisExists /> */}
-  <TrustBand />
-  <PipelineSection />
-  <IntegrateSection />
-  <StatusPage variant="dev" />
-  <SchemaPreview />
-  <Footer variant="dev" />
-  <DevSignupModal />
-  <WelcomeModal />
+  <Nav />
+  <HeroOperator />
+  <HowItWorksSection />
+  <LiveInboxExample />
+
+  <section class="spaced" id="make" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow"><span class="blue-dot"></span>Send invoices too</span>
+        <h2><span class="primary-blue">Need to send</span> <span class="accent">an invoice?</span></h2>
+        <p>Generate a clean, signed PDF in seconds — no template wrangling, no setup. Drop in line items, hit send, you're done.</p>
+      </div>
+
+      <a href="https://make.invoicepass.app" target="_blank" rel="noopener" class="btn-cta-primary">
+        Make an invoice
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <PricingSection />
+
+  <section class="spaced" id="developers">
+    <div class="container">
+      <div class="cta-section">
+        <span class="eyebrow" style="color: var(--ink-5)"><span class="blue-dot"></span>For developers</span>
+        <h2 style="margin-top: 16px;"><span class="primary-blue">Building on top of</span> <span class="accent">InvoicePass?</span></h2>
+        <p>An invoice ingestion layer for engineers — SMTP ingress, deterministic deduplication, and signed delivery to your stack. We're onboarding integration partners manually during preview.</p>
+
+        <button type="button" data-open-contact class="cta-button">
+          Get in touch
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+  <HowItWorksModal />
+  <ContactModal />
   <Toast />
 </Base>
