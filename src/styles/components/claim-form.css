@@ -96,6 +96,7 @@
 
 .claim.is-available { border-color: var(--green); box-shadow: 0 0 0 3px rgba(24, 169, 87, 0.12); }
 .claim.is-taken     { border-color: var(--red);   box-shadow: 0 0 0 3px rgba(220, 74, 74, 0.12); }
+.claim.is-checking  { border-color: var(--border); }
 
 .claim input {
   flex: 1;
